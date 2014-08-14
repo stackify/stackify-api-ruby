@@ -1,7 +1,7 @@
 module Stackify
   class LogsSender < HttpClient
 
-    LOGS_URI = URI('https://dev.stackify.com/api/Log/Save')
+    LOGS_URI = URI(Stackify.configuration.api_urls[:logs])
 
     def start
       worker = Stackify::Worker.new 'Main sending thread'

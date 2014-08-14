@@ -1,7 +1,7 @@
 module Stackify::Metrics
   class MetricsSender < Stackify::HttpClient
-    SUBMIT_METRIS_URI = URI('https://dev.stackify.com/api/Metrics/SubmitMetricsByID')
-    GET_METRIC_INFO_URI = URI('https://dev.stackify.com/api/Metrics/GetMetricInfo')
+    SUBMIT_METRIS_URI = URI(Stackify.configuration.api_urls[:metric_submit])
+    GET_METRIC_INFO_URI = URI(Stackify.configuration.api_urls[:get_metric_info])
 
     def initialize
     end

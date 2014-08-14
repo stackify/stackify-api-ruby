@@ -4,11 +4,17 @@ module Stackify
 
     attr_accessor :api_key, :app_name, :app_location, :env, :log_level, :flood_limit,
                   :queue_max_size, :logger, :send_interval, :with_proxy,
-                  :proxy_host, :proxy_port, :proxy_user, :proxy_pass, :mode
+                  :proxy_host, :proxy_port, :proxy_user, :proxy_pass, :mode, :api_urls
 
     attr_reader :errors
 
     def initialize
+      @api_urls = {
+        auth: 'https://dev.stackify.com/api/Metrics/IdentifyApp',
+        metric_submit: 'https://dev.stackify.com/api/Metrics/SubmitMetricsByID',
+        get_metric_info: 'https://dev.stackify.com/api/Metrics/GetMetricInfo',
+        logs: 'https://dev.stackify.com/api/Log/Save'
+      }
       @errors = []
       @api_key = ''
       @env = :production
