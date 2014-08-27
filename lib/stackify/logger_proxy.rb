@@ -27,7 +27,7 @@ module Stackify
       if block
         block.call
       else
-        args[0]
+        args.flatten[0]
       end
     end
 

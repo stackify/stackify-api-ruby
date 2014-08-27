@@ -9,13 +9,13 @@ module Stackify
     def initialize
       rails_info = defined?(Rails) ? Rails::Info.properties.to_h : nil
       @info =  rails_info || { 'Application root' => Dir.pwd, 'Environment' => 'development'}
-      @request_details = nil
+      @request_details = {}
       @app_name = app_name
       app_location = Stackify.configuration.app_location || @info['Application root']
       @details = {
         'DeviceName' => Socket.gethostname,
         'AppLocation' => app_location,
-        'AppName' => @app_name, 
+        'AppName' => @app_name,
         'ConfiguredAppName' => @app_name,
         'ConfiguredEnvironmentName' =>@info['Environment']
       }
@@ -73,7 +73,7 @@ module Stackify
     end
 
     def cookies env
-      env['action_dispatch.cookies'].to_h
+      env['action_dispatch.cookies'].try(:to_h)
     end
 
     def headers env

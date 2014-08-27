@@ -7,23 +7,27 @@ module Stackify
     end
 
     def log level, msg
-      if acceptable? level, msg && Stackify.working?
-        worker = Stackify::AddMsgWorker.new
-        task = log_message_task level, msg
-        worker.async_perform PERIOD, task
+      Stackify::Utils.do_only_if_authorized_and_mode_is_on Stackify::MODES[:logging] do
+        if acceptable? level, msg && Stackify.working?
+          worker = Stackify::AddMsgWorker.new
+          task = log_message_task level, msg
+          worker.async_perform PERIOD, task
+        end
       end
     end
 
     def log_exception level= :error, ex
       if ex.is_a?(Stackify::StackifiedError)
-        if acceptable? level, ex.message && Stackify.working?
-          if @@errors_governor.can_send? ex
-            worker = Stackify::AddMsgWorker.new
-            task = log_exception_task level, ex
-            worker.async_perform PERIOD, task
-          else
-            Stackify.internal_log :warn,
-            "LoggerClient: logging of exception with message \"#{ex.message}\" is skipped - flood_limit is exceeded"
+        Stackify::Utils.do_only_if_authorized_and_mode_is_on Stackify::MODES[:logging] do
+          if acceptable? level, ex.message && Stackify.working?
+            if @@errors_governor.can_send? ex
+              worker = Stackify::AddMsgWorker.new
+              task = log_exception_task level, ex
+              worker.async_perform PERIOD, task
+            else
+              Stackify.internal_log :warn,
+              "LoggerClient: logging of exception with message \"#{ex.message}\" is skipped - flood_limit is exceeded"
+            end
           end
         end
       else
@@ -34,7 +38,9 @@ module Stackify
     private
 
     def acceptable? level, msg
-      Stackify.is_valid? && is_correct_log_level?(level) && is_not_internal_log_message?(msg) && is_appropriate_env?
+      Stackify.is_valid? && is_correct_log_level?(level) &&
+        is_not_internal_log_message?(msg) &&
+        is_appropriate_env?
     end
 
     def is_not_internal_log_message? msg

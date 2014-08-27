@@ -26,8 +26,6 @@ module Stackify::Metrics
 
   class GetMetricResponse
     attr_accessor :monitor_id
-    def initialize
-    end
   end
 
 

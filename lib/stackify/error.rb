@@ -40,14 +40,14 @@ module Stackify
           'Message' => message,
           'ErrorType' => error_type.to_s,
           'ErrorTypeCode' => nil,
-          'Data' => { user_id: '1'},
+          'Data' => {},
           'SourceMethod' => source_method,
         },
         'EnvironmentDetail' => env.auth_info,
-        'WebRequestDetail' => env.request_details.try{ |d| d['webrequest_details'] },
-        'ServerVariables' => env.request_details.try{ |d| d['server_variables'] },
+        'WebRequestDetail' => env.request_details.try{ |d| d.fetch('webrequest_details', '') },
+        'ServerVariables' => env.request_details.try{ |d| d.fetch('server_variables', '') },
         'CustomerName' => 'Customer',
-        'UserName' => @context['user']
+        'UserName' => @context.fetch('user', '')
       }
     end
 

@@ -1,6 +1,6 @@
 require 'stackify/version'
 require 'stackify/utils/methods'
-require 'active_support/core_ext' unless defined? Rails
+require 'core_ext/core_ext' unless defined? Rails
 
 module Stackify
 
@@ -39,14 +39,14 @@ module Stackify
     end
 
     def setup
+      @workers = []
       yield(configuration) if block_given?
       if configuration.is_valid?
         @status = STATUSES[:working]
-        @workers = []
       else
         msg = "Stackify's configuration is not valid!"
         configuration.errors.each do |error_msg|
-          msg += "\n"+error_msg
+          msg += "\n" + error_msg
         end
         raise msg
       end
@@ -70,6 +70,7 @@ module Stackify
     end
 
     def shutdown_all caller_obj=nil
+      Stackify.status = Stackify::STATUSES[:terminating]
       @workers.each do |worker|
         worker.shutdown! unless worker.equal? caller_obj
       end
@@ -116,6 +117,8 @@ module Stackify
           t1.join
           t2.join if t2
         end
+      else
+        Stackify.log_internal_error "Stackify is not properly configured! Errors: #{Stackify.configuration.errors}"
       end
     end
 

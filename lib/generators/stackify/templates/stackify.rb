@@ -1,11 +1,8 @@
 Stackify.setup do |config|
   config.api_key = '<%= options[:api_key] %>'
   #config.mode = :both
-  #config.app_name =  "Your's app name"
+  #config.app_name = "Your's app name"
   #config.env = :development
-  #config.flood_limit = 100
-  #config.queue_max_size = 1000
-  #config.send_interval = 60 #sec
   #config.log_level = :error
   #config.logger = Logger.new(File.join(Rails.root, 'log', 'stackify.log'))
   #config.logger.level = Logger::INFO

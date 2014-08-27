@@ -2,19 +2,13 @@ module Stackify
 
   class Configuration
 
-    attr_accessor :api_key, :app_name, :app_location, :env, :log_level, :flood_limit,
-                  :queue_max_size, :logger, :send_interval, :with_proxy,
-                  :proxy_host, :proxy_port, :proxy_user, :proxy_pass, :mode, :api_urls
+    attr_accessor :api_key, :app_name, :app_location, :env, :log_level, :logger, :with_proxy,
+                  :proxy_host, :proxy_port, :proxy_user, :proxy_pass, :mode, :base_api_url
 
-    attr_reader :errors
+    attr_reader :errors, :send_interval, :flood_limit, :queue_max_size
 
     def initialize
-      @api_urls = {
-        auth: 'https://dev.stackify.com/api/Metrics/IdentifyApp',
-        metric_submit: 'https://dev.stackify.com/api/Metrics/SubmitMetricsByID',
-        get_metric_info: 'https://dev.stackify.com/api/Metrics/GetMetricInfo',
-        logs: 'https://dev.stackify.com/api/Log/Save'
-      }
+      @base_api_url = 'https://api.stackify.com'
       @errors = []
       @api_key = ''
       @env = :production
@@ -33,19 +27,14 @@ module Stackify
 
     def is_valid?
       @errors = []
-      validate_send_interval && validate_mode if validate_config_types
+      validate_mode if validate_config_types
       @errors.empty?
     end
 
     private
-    def validate_send_interval
-      return true if 60 <= @send_interval && @send_interval <= 60000
-      @errors << 'Send interval is not correct!'
-    end
 
     def validate_config_types
       validate_api_key &&
-      validate_flood_limit_queue_max_size_and_send_interval &&
       validate_log_level &&
       validate_mode_type
     end
@@ -56,19 +45,8 @@ module Stackify
     end
 
     def validate_api_key
-      return true if  @api_key.is_a? String
-      @errors << 'API_KEY should be a String'
-    end
-
-    def validate_flood_limit_queue_max_size_and_send_interval
-      answer = true
-      { 'Flood limit' => @flood_limit, "Queue's max size" => @queue_max_size, 'Send interval' => @send_interval }.each_pair do |k, v|
-        unless v.is_a? Integer
-          answer = false
-          @errors << "#{k} should be an Integer"
-        end
-      end
-      answer
+      return true if  @api_key.is_a?(String) && !@api_key.empty?
+      @errors << 'API_KEY should be a String and not empty'
     end
 
     def validate_log_level

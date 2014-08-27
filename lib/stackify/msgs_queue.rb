@@ -33,8 +33,7 @@ module Stackify
           @current_chunk_weight += msg['Ex'].nil? ? LOG_SIZE : ERROR_SIZE
           @current_chunk << msg
           if @current_chunk_weight >= CHUNK_MIN_WEIGHT
-            self.old_push(@current_chunk)
-            reset_current_chunk
+            push_current_chunk
           end
         else
           Stackify.log_internal_error "MsgsQueue: add_msg should get hash, but not a #{msg.class}"

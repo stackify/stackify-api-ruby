@@ -24,14 +24,13 @@ After you install stackify-api-ruby you need to run the generator:
 
     $ rails g stackify --api_key=your_api_key
 
-The generator creates a file under config/initializers/stackify.rb configuring stackify-api-ruby with your API key. You can change default settings there.
+The generator creates a file 'config/initializers/stackify.rb' configuring stackify-api-ruby with your API key. You can change default settings there.
 
 Usage: Logging
 ------------------
-
 ### Rails Environment
 
-stackify-api-ruby starts working with start of Rails. Every occured error will be cought and sent to Stackify automatically. The same situation with logs - you just use the Rails logger as usual:
+stackify-api-ruby starts with start of Rails. Every error, which occurs within your application, will be caught and sent to Stackify automatically. The same situation with logs - you just use the Rails logger as usual:
 
     Rails.logger.info "Some log message"
 
@@ -46,8 +45,8 @@ After that you need to make base configuration:
     Stackify.setup do |config|
       config.api_key = "your_api_key"
       config.env = :development
-      config.app_name =  "Your's app name"
-      config.app_location =  "/somewhere/public"
+      config.app_name = "Your app name"
+      config.app_location = "/somewhere/public"
     end
 
 "api_key" - it's you key for Stackify. "app-location" - it's location of your application for Nginx/Apache(for Nginx it's value of 'root', for Apache it's value of 'DocumentRoot' at config files).
@@ -61,19 +60,7 @@ You can set minimal level of logs, which should be caught by gem:
 
     config.log_level = :error
 
-By default, gem sends logs to Stackify every 60 seconds, you can increase this value to higher if need:
-
-    config.send_interval = 60 #value in seconds, could not be less than 60 seconds
-
-All logs, errors, and metrics are queued within the gem and uploaded on a background thread. By default, the maximum amount of logs is 1,000 log items, you can decrease this value:
-
-    config.queue_max_size = 600
-
-To help prevent flooding the system there is a parameter - max amount of the same error per minute:
-
-    config.flood_limit = 100
-
-If you want to use proxy for sendig request, you can do it in such way:
+If you want to use proxy for sending request, you can do it in such way:
 
     config.with_proxy = true
     config.proxy_host = "127.0.0.1"
@@ -81,11 +68,11 @@ If you want to use proxy for sendig request, you can do it in such way:
     config.proxy_user = nil
     config.proxy_pass = nil
 
-For logging own work stackify-api-rubystackify-api-rubygem uses such logger:
+For internal logging stackify-api-ruby uses such logger:
 
     config.logger = Logger.new(File.join(Rails.root, "log", "stackify.log"))
 
-After set up of logs you should wrap up your logger:
+After logs configuring you should wrap up your logger:
 
     logger = Logger.new('mylog.log')
     logger = Stackify::LoggerProxy.new(logger)
@@ -124,7 +111,7 @@ There are four different types of metrics:
 
 We can configure every metric with settings:
 
-        settings  = MetricSettings.new
+        settings = MetricSettings.new
         settings.autoreport_zero_if_nothing_reported = true
         # or
         settings.autoreport_last_value_if_nothing_reported = true

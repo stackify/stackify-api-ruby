@@ -11,9 +11,6 @@ module Stackify
     }
     attr_reader :response, :errors
 
-    def initialize
-    end
-
     private
 
     def send_request uri, body, headers = HEADERS

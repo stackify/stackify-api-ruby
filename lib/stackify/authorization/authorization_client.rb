@@ -1,8 +1,7 @@
 module Stackify::Authorizable
-
   class AuthorizationClient < Stackify::HttpClient
 
-    BASE_URI = URI(Stackify.configuration.api_urls[:auth])
+    BASE_URI = URI("#{Stackify.configuration.base_api_url}/Metrics/IdentifyApp")
 
     def initialize
       super

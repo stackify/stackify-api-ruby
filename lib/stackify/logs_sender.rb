@@ -1,7 +1,7 @@
 module Stackify
   class LogsSender < HttpClient
 
-    LOGS_URI = URI(Stackify.configuration.api_urls[:logs])
+    LOGS_URI = URI("#{Stackify.configuration.base_api_url}/Log/Save")
 
     def start
       worker = Stackify::Worker.new 'Main sending thread'
@@ -67,7 +67,9 @@ module Stackify
         'Logger' => 'Rails logger',
         'AppName' => details['AppName'],
         'AppNameID' => details['AppNameID'],
+        'Env' => details['Env'],
         'EnvID' => details['EnvID'],
+        'AppEnvID' => details['AppEnvID'],
         'ServerName' => details['DeviceName'],
         'Msgs' => msgs,
         'AppLoc' => details['AppLocation'],

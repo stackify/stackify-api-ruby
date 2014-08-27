@@ -9,7 +9,7 @@ module Stackify::Authorizable
     @@authorized = false
     @@auth_lock = Mutex.new
     @@auth_client = nil
-        
+
     def authorize attempts=3, delay_time = 20
       @@auth_lock.synchronize do
         return unless @@auth_client.nil?
@@ -19,7 +19,7 @@ module Stackify::Authorizable
     end
 
     def authorized?
-      @@auth_lock.synchronize do 
+      @@auth_lock.synchronize do
         @@authorized
       end
     end

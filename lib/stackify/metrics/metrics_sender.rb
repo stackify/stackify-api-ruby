@@ -1,10 +1,7 @@
 module Stackify::Metrics
   class MetricsSender < Stackify::HttpClient
-    SUBMIT_METRIS_URI = URI(Stackify.configuration.api_urls[:metric_submit])
-    GET_METRIC_INFO_URI = URI(Stackify.configuration.api_urls[:get_metric_info])
-
-    def initialize
-    end
+    SUBMIT_METRIS_URI = URI("#{Stackify.configuration.base_api_url}/Metrics/SubmitMetricsByID")
+    GET_METRIC_INFO_URI = URI("#{Stackify.configuration.base_api_url}/Metrics/GetMetricInfo")
 
     def monitor_info aggr_metric
       if Stackify.authorized?
