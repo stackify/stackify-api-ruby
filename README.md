@@ -62,11 +62,7 @@ You can set minimal level of logs, which should be caught by gem:
 
 If you want to use proxy for sending request, you can do it in such way:
 
-    config.with_proxy = true
-    config.proxy_host = "127.0.0.1"
-    config.proxy_port = "8118"
-    config.proxy_user = nil
-    config.proxy_pass = nil
+    config.proxy = { uri: '127.0.0.1:8118', user: 'user_name', password: 'some_password' }
 
 For internal logging stackify-api-ruby uses such logger:
 

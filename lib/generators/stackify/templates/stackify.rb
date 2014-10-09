@@ -6,9 +6,5 @@ Stackify.setup do |config|
   #config.log_level = :error
   #config.logger = Logger.new(File.join(Rails.root, 'log', 'stackify.log'))
   #config.logger.level = Logger::INFO
-  #config.with_proxy = false
-  #config.proxy_host = '127.0.0.1'
-  #config.proxy_port = '8118'
-  #config.proxy_user = nil
-  #config.proxy_pass = nil
+  #config.proxy = {uri: '127.0.0.1:8118', user: 'user_name', password: 'some_password'}
 end

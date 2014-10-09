@@ -16,9 +16,11 @@ module Stackify
   autoload :EnvDetails,           'stackify/env_details'
   autoload :Scheduler,            'stackify/scheduler'
   autoload :ScheduleTask,         'stackify/schedule_task'
+  autoload :ScheduleDelay,        'stackify/schedule_delay'
   autoload :Worker,               'stackify/workers/worker'
   autoload :AuthWorker,           'stackify/workers/auth_worker'
   autoload :LogsSenderWorker,     'stackify/workers/logs_sender_worker'
+  autoload :MsgsQueueWorker,      'stackify/workers/msgs_queue_worker'
   autoload :AddMsgWorker,         'stackify/workers/add_msg_worker'
   autoload :MsgsQueue,            'stackify/msgs_queue'
   autoload :LoggerClient,         'stackify/logger_client'
@@ -123,7 +125,7 @@ module Stackify
     end
 
     def start_logging
-      Thread.new { Stackify.logs_sender.start}
+      msgs_queue
     end
 
     def start_metrics

@@ -9,18 +9,17 @@ module Stackify::Metrics
     alias :old_push :push
 
     def add_metric metric
-      self.synchronize do 
+      self.synchronize do
         self.old_push metric
       end
     end
 
-    alias :old_size :size 
+    alias :old_size :size
 
-    def size 
-      self.synchronize do 
+    def size
+      self.synchronize do
         self.old_size
       end
     end
-    
   end
 end

@@ -17,7 +17,7 @@ module Stackify::Metrics
         worker = Stackify::Worker.new 'Metrics client - processing of metrics'
         Stackify.internal_log :debug, 'Metrics client: processing of metrics is started'
         task = submit_metrics_task
-        worker.async_perform 5, task
+        worker.async_perform Stackify::ScheduleDelay.new, task
       else
         Stackify.internal_log :warn, '[MetricClient]: Processing of metrics is disabled at configuration!'
       end
@@ -51,11 +51,10 @@ module Stackify::Metrics
         Stackify.internal_log :warn, '[MetricClient]: Adding of metrics is impossible - Stackify is terminating or terminated work.'
       end
     end
-    
+
     private
-    
+
     def start_upload_metrics
-      all_is_ok = false
       current_time = Stackify::Utils.rounded_current_time
       purge_older_than = current_time - 10.minutes
       #read everything up to the start of the current minute
@@ -140,7 +139,7 @@ module Stackify::Metrics
     end
 
     def submit_metrics_task
-      Stackify::ScheduleTask.new do 
+      Stackify::ScheduleTask.new do
         start_upload_metrics
       end
     end

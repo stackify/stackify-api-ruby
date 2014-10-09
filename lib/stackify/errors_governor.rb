@@ -1,6 +1,7 @@
+require 'digest'
+
 module Stackify
   class ErrorsGovernor
-    require 'digest'
 
     def initialize purge_period=5
       @history = {}
@@ -17,7 +18,7 @@ module Stackify
         history_entry = @history[key]
         if history_entry[:epoch_minute] == epoch_minute
           history_entry[:count] += 1
-          answer = (history_entry[:count] <= Stackify.configuration.flood_limit) ? true : false
+          answer = history_entry[:count] <= Stackify.configuration.flood_limit
         else
           @history[key]={
             epoch_minute: epoch_minute,

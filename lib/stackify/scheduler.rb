@@ -9,7 +9,7 @@ module Stackify
     def initialize
       @should_run = true
       @next_invocation_time = Time.now
-      @period = 60.0
+      @period = ScheduleDelay.new
       @iterations = 0
       @attempts = 3
     end
@@ -21,7 +21,7 @@ module Stackify
       @iterations = 0
       @attempts = @task.attempts if @task.attempts
       now = Time.now
-      @next_invocation_time = (now + @period)
+      @next_invocation_time = (now + @period.to_sec)
     end
 
     def run(period=nil, task)
@@ -34,6 +34,7 @@ module Stackify
           @iterations += 1
           @attempts = @task.attempts || @attempts
         else
+          @period.update_by_exeption!(@task_result)
           @attempts -= 1
         end
       end
@@ -42,8 +43,8 @@ module Stackify
 
     def schedule_next_invocation
       now = Time.now
-      while @next_invocation_time <= now && @period > 0
-        @next_invocation_time += @period
+      while @next_invocation_time <= now && @period.to_sec > 0
+        @next_invocation_time += @period.to_sec
       end
       @next_invocation_time - Time.now
     end

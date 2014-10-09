@@ -7,7 +7,7 @@ module Stackify
     end
 
     def after_perform result
-      if result.try(:code) == '200'
+      if result.try(:status) == 200
         Stackify.send :authorized!
         Stackify.successfull_authorisation result
       else

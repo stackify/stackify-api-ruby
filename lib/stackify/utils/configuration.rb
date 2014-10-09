@@ -2,8 +2,8 @@ module Stackify
 
   class Configuration
 
-    attr_accessor :api_key, :app_name, :app_location, :env, :log_level, :logger, :with_proxy,
-                  :proxy_host, :proxy_port, :proxy_user, :proxy_pass, :mode, :base_api_url
+    attr_accessor :api_key, :app_name, :app_location, :env, :log_level, :logger,
+                  :proxy, :mode, :base_api_url
 
     attr_reader :errors, :send_interval, :flood_limit, :queue_max_size
 
@@ -13,9 +13,8 @@ module Stackify
       @api_key = ''
       @env = :production
       @flood_limit = 100
-      @queue_max_size = 1000
+      @queue_max_size = 10000
       @send_interval = 60
-      @with_proxy = false
       @log_level = :info
       @mode = MODES[:both]
       @logger = if defined? Rails

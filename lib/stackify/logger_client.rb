@@ -1,6 +1,5 @@
 module Stackify
   class LoggerClient
-    PERIOD = 1
 
     def initialize
       @@errors_governor = Stackify::ErrorsGovernor.new
@@ -11,7 +10,7 @@ module Stackify
         if acceptable? level, msg && Stackify.working?
           worker = Stackify::AddMsgWorker.new
           task = log_message_task level, msg
-          worker.async_perform PERIOD, task
+          worker.async_perform ScheduleDelay.new, task
         end
       end
     end
@@ -23,7 +22,7 @@ module Stackify
             if @@errors_governor.can_send? ex
               worker = Stackify::AddMsgWorker.new
               task = log_exception_task level, ex
-              worker.async_perform PERIOD, task
+              worker.async_perform ScheduleDelay.new, task
             else
               Stackify.internal_log :warn,
               "LoggerClient: logging of exception with message \"#{ex.message}\" is skipped - flood_limit is exceeded"
@@ -59,17 +58,13 @@ module Stackify
 
     def log_message_task level, msg
       Stackify::ScheduleTask.new ({limit: 1}) do
-        Stackify.msgs_queue.add_msg Stackify::MsgObject.new(level, msg, caller[0]).to_h
-        str = "LoggerClient: logging of message #{msg} with level '#{level}' is completed successfully."
-        Stackify.internal_log :debug, str
+        Stackify.msgs_queue << Stackify::MsgObject.new(level, msg, caller[0]).to_h
       end
     end
 
     def log_exception_task level, ex
       Stackify::ScheduleTask.new ({limit: 1}) do
-        Stackify.msgs_queue.add_msg Stackify::MsgObject.new(level, ex.message, caller[0], ex).to_h
-        Stackify.internal_log :debug, 'LoggerClient: '+
-        'Logging of the exception %p: %s is completed successfully' % [ ex.class, ex.message ]
+        Stackify.msgs_queue << Stackify::MsgObject.new(level, ex.message, caller[0], ex).to_h
       end
     end
   end

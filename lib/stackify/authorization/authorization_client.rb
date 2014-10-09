@@ -8,7 +8,7 @@ module Stackify::Authorizable
       @worker = Stackify::AuthWorker.new
     end
 
-    def auth attempts, delay_time= 20
+    def auth attempts, delay_time= Stackify::ScheduleDelay.new
       task = auth_task attempts
       @worker.perform delay_time, task
     end
@@ -18,7 +18,7 @@ module Stackify::Authorizable
         limit: 1,
         attempts: attempts,
         success_condition: lambda do |result|
-          result.try(:code) == '200'
+          result.try(:status) == 200
         end
       }
       Stackify::ScheduleTask.new properties do

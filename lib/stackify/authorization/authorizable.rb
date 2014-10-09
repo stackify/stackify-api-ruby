@@ -10,11 +10,11 @@ module Stackify::Authorizable
     @@auth_lock = Mutex.new
     @@auth_client = nil
 
-    def authorize attempts=3, delay_time = 20
+    def authorize attempts=3
       @@auth_lock.synchronize do
         return unless @@auth_client.nil?
         @@auth_client = Stackify::Authorizable::AuthorizationClient.new
-        @@auth_client.auth attempts, delay_time
+        @@auth_client.auth attempts
       end
     end
 
@@ -53,7 +53,7 @@ module Stackify::Authorizable
 
     def response_string r
       return '' if r.nil?
-      "Code: #{r.try(:code)}, Message: '#{r.try(:msg)}'"
+      "Status: #{r.try(:status)}, Message: '#{r.try(:body)}'"
     end
 
   end
