@@ -10,7 +10,7 @@ module Stackify
         'data' => nil,
         'Ex' => @ex.try(:to_h),
         'Level' => @level.to_s.upcase!,
-        'Tags' => %w(ruby rails),
+        #'Tags' => %w(ruby rails),
         'EpochMs' => Time.now.to_f * 1000,
         'Th' => Thread.current.object_id.to_s,
         'TransID' => Stackify::EnvDetails.instance.request_details.try{ |d| d['uuid'] },
