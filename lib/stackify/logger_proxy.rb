@@ -8,7 +8,7 @@ module Stackify
         LoggerProxy.class_eval do
           define_method level.to_sym do |*args , &block|
             msg = message(args, block)
-            Stackify.logger_client.log(level.downcase, msg)
+            Stackify.logger_client.log(level.downcase, msg, caller)
             @logger.send(level.to_sym, args, &block)
           end
         end
