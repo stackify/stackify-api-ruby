@@ -7,7 +7,7 @@ module Stackify::Metrics
       if Stackify.authorized?
         send_request GET_METRIC_INFO_URI, GetMetricRequest.new(aggr_metric).to_h.to_json
       else
-        Stackify.log_internal_error "Getting of monitor_info is failed because of authorisation failure"
+        Stackify.log_internal_error "Getting of monitor_info is failed because of authorization failure"
       end
     end
 
@@ -22,7 +22,7 @@ module Stackify::Metrics
         end
         send_request SUBMIT_METRIS_URI, records.to_json
       else
-        Stackify.log_internal_error "Uploading of metrics is failed because of authorisation failure"
+        Stackify.log_internal_error "Uploading of metrics is failed because of authorization failure"
       end
     end
   end

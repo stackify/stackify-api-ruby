@@ -30,11 +30,11 @@ module Stackify::Authorizable
 
     def successfull_authorisation response
       Stackify::EnvDetails.instance.update_auth_info JSON.parse(response.body)
-      Stackify.internal_log :info, 'Authorisation is finished successfully.'
+      Stackify.internal_log :info, 'Authorization is finished successfully.'
     end
 
     def unsuccessfull_authorisation response, caller
-      Stackify.log_internal_error "Authorisation finally failed: #{response_string(response)}"
+      Stackify.log_internal_error "Authorization finally failed: #{response_string(response)}"
       Stackify.shutdown_all caller unless @@authorized
     end
 

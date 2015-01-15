@@ -22,7 +22,7 @@ module Stackify::Authorizable
         end
       }
       Stackify::ScheduleTask.new properties do
-        Stackify.internal_log :debug, 'AthorizationClient: trying to athorize...'
+        Stackify.internal_log :debug, 'AthorizationClient: trying to authorize...'
         send_request BASE_URI, Stackify::EnvDetails.instance.auth_info.to_json
       end
     end
