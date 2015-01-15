@@ -38,7 +38,6 @@ module Stackify::Metrics
 
     def to_h
       {
-        'Count' => @count,
         'MetricType' => @metric_type,
         'MetricID' => @metric_id,
         'Name' => @name,

@@ -5,11 +5,11 @@ module Stackify
       @@errors_governor = Stackify::ErrorsGovernor.new
     end
 
-    def log level, msg
+    def log level, msg, call_trace
       Stackify::Utils.do_only_if_authorized_and_mode_is_on Stackify::MODES[:logging] do
         if acceptable? level, msg && Stackify.working?
           worker = Stackify::AddMsgWorker.new
-          task = log_message_task level, msg
+          task = log_message_task level, msg, call_trace
           worker.async_perform ScheduleDelay.new, task
         end
       end
@@ -56,9 +56,12 @@ module Stackify
       Stackify.configuration.env.downcase.to_sym == Stackify::EnvDetails.instance.auth_info['ConfiguredEnvironmentName'].downcase.to_sym
     end
 
-    def log_message_task level, msg
+    def log_message_task level, msg, call_trace
       Stackify::ScheduleTask.new ({limit: 1}) do
-        Stackify.msgs_queue << Stackify::MsgObject.new(level, msg, caller[0]).to_h
+        e = Exception.new(msg)
+        e.set_backtrace(call_trace)
+        ex = StackifiedError.new(e, binding())
+        Stackify.msgs_queue << Stackify::MsgObject.new(level, ex.message, caller[0], ex).to_h
       end
     end
 

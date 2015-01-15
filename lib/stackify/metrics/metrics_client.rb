@@ -203,7 +203,7 @@ module Stackify::Metrics
           mon_info = @monitor_ids[metric.name_key]
         else
           req = @metrics_sender.monitor_info metric
-          if req.try(:code) == '200'
+          if req.try(:status) == 200
             mon_info = JSON.parse req.body
             if !mon_info.nil? && !mon_info['MonitorID'].nil? && mon_info['MonitorID'] > 0
               @monitor_ids[metric.name_key] = mon_info
@@ -229,7 +229,7 @@ module Stackify::Metrics
         #get identified once
         aggr_metrics_for_upload = aggr_metrics.select { |_key, aggr_metric| !aggr_metric.monitor_id.nil? }
         response = @metrics_sender.upload_metrics aggr_metrics_for_upload
-        Stackify.internal_log :info, 'Metrics are uploaded successfully' if response.try(:code) == '200'
+        Stackify.internal_log :info, 'Metrics are uploaded successfully' if response.try(:status) == 200
         all_success
       end
     end
