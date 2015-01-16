@@ -1,5 +1,9 @@
 module Stackify
-
+  class StringException < StandardError
+    def class
+      'StringException'.freeze
+    end
+  end
   class StackifiedError < StandardError
 
     CONTEXT_PROPERTIES =  { 'user' => 'current_user'}

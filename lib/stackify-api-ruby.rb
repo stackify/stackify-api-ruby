@@ -27,6 +27,7 @@ module Stackify
   autoload :LogsSender,           'stackify/logs_sender'
   autoload :LoggerProxy,          'stackify/logger_proxy'
   autoload :StackifiedError,      'stackify/error'
+  autoload :StringException,      'stackify/error'
   autoload :ErrorsGovernor,       'stackify/errors_governor'
   autoload :Metrics,              'stackify/metrics/metrics'
 

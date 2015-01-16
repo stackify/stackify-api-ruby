@@ -58,10 +58,20 @@ module Stackify
 
     def log_message_task level, msg, call_trace
       Stackify::ScheduleTask.new ({limit: 1}) do
-        e = Exception.new(msg)
-        e.set_backtrace(call_trace)
-        ex = StackifiedError.new(e, binding())
-        Stackify.msgs_queue << Stackify::MsgObject.new(level, ex.message, caller[0], ex).to_h
+        if %w(error fatal).include?(level)
+          ex = if ruby_exception?(msg) && msg.class != Class
+            msg.set_backtrace(call_trace)
+            msg
+          else
+            e = StringException.new(msg)
+            e.set_backtrace(call_trace)
+            e
+          end
+          ex = StackifiedError.new(ex, binding())
+          Stackify.msgs_queue << Stackify::MsgObject.new(level, ex.message, caller[0], ex).to_h
+        else
+          Stackify.msgs_queue << Stackify::MsgObject.new(level, msg, caller[0]).to_h
+        end
       end
     end
 
@@ -69,6 +79,16 @@ module Stackify
       Stackify::ScheduleTask.new ({limit: 1}) do
         Stackify.msgs_queue << Stackify::MsgObject.new(level, ex.message, caller[0], ex).to_h
       end
+    end
+
+    def ruby_exception? klass
+      klass = klass.class == Class ? klass : klass.class
+      klasses = [klass]
+      while klass != Object do
+        klasses << klass.superclass
+        klass = klass.superclass
+      end
+      klasses.include?(Exception)
     end
   end
 
