@@ -7,9 +7,9 @@ module Stackify
       %w( debug info warn error fatal unknown).each do |level|
         LoggerProxy.class_eval do
           define_method level.to_sym do |*args , &block|
-            msg = message(args, block)
+            msg = message(*args, &block)
             Stackify.logger_client.log(level.downcase, msg, caller)
-            @logger.send(level.to_sym, args, &block)
+            @logger.send(level.to_sym, msg, &block)
           end
         end
       end
@@ -24,10 +24,12 @@ module Stackify
     private
 
     def message *args, &block
-      if block
+      if block_given?
         block.call
       else
-        args.flatten[0]
+        args = args.flatten.compact
+        args = (args.count == 1 ? args[0] : args)
+        args.is_a?(Proc) ? args.call : args
       end
     end
 
