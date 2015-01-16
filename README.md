@@ -34,6 +34,12 @@ stackify-api-ruby starts with start of Rails. Every error, which occurs within y
 
     Rails.logger.info "Some log message"
 
+If you want to redefine <b>logger</b>, you should add
+
+    config.logger = ::Stackify::LoggerProxy.new(ActiveSupport::Logger.new(File.join(Rails.root, 'log', "#{Rails.env}.log")))
+
+to your config/environments/%environment%. <b>Note:</b> in this case Stackify#config.log_level will affect entire system.
+
 ### Other Environment
 
 For using stackify-api-ruby gem within any Ruby application add to top of your main file:
