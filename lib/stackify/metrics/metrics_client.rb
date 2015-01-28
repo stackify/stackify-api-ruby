@@ -157,9 +157,9 @@ module Stackify::Metrics
           agg.occurred_utc = current_time
           case aggregate.metric_type
           when Stackify::Metrics::METRIC_TYPES[:metric_last]
-            setting.autoreport_last_value_if_nothing_reported = false #do not allow this
+            settings.autoreport_last_value_if_nothing_reported = false #do not allow this
           when Stackify::Metrics::METRIC_TYPES[:counter]
-            setting.autoreport_last_value_if_nothing_reported = false #do not allow this
+            settings.autoreport_last_value_if_nothing_reported = false #do not allow this
           end
           if settings.autoreport_zero_if_nothing_reported
             agg.count = 1
