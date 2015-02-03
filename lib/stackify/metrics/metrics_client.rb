@@ -173,6 +173,7 @@ module Stackify::Metrics
           end
           agg_key = agg.aggregate_key
           unless @aggregate_metrics.has_key? agg_key
+            agg.occurred_utc = current_time - 60
             agg.name_key = aggregate.name_key
             Stackify.internal_log :debug, 'Creating 0 default value for ' + agg_key
             @aggregate_metrics[agg_key] = agg
