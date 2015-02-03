@@ -4,11 +4,16 @@ module Stackify
     def initialize logger
       @logger = logger
       @logger.level = Logger.const_get(Stackify.configuration.log_level.to_s.upcase)
-      %w( debug info warn error fatal unknown).each do |level|
+      %w(debug info warn error fatal unknown).each do |level|
+        stackify_logger = if level == 'debug'
+          -> (msg, caller) { Stackify.logger_client.log(level.downcase, msg, caller) unless msg.empty? }
+        else
+          -> (msg, caller) { Stackify.logger_client.log(level.downcase, msg, caller) }
+        end
         LoggerProxy.class_eval do
           define_method level.to_sym do |*args , &block|
             msg = message(*args, &block)
-            Stackify.logger_client.log(level.downcase, msg, caller)
+            stackify_logger.call(msg, caller)
             @logger.send(level.to_sym, msg, &block)
           end
         end
