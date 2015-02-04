@@ -62,14 +62,15 @@ module Stackify
         Stackify::Metrics.metrics_client.queue_metric m
       end
 
-      def time category, metric_name, start_time
+      def time category, metric_name, start_time, advanced_settings = nil
         time_taken = Time.now.utc - start_time.utc
-        avarage_time category, metric_name, time_taken
+        avarage_time category, metric_name, time_taken, advanced_settings
       end
 
-      def avarage_time category, metric_name, elapsed_time
+      def avarage_time category, metric_name, elapsed_time, advanced_settings = nil
         m = Metric.new category, metric_name, Stackify::Metrics::METRIC_TYPES[:counter_time]
         m.value = elapsed_time.round #seconds
+        m.settings = advanced_settings
         Stackify::Metrics.metrics_client.queue_metric m
       end
 

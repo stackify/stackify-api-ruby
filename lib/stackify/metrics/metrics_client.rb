@@ -70,6 +70,7 @@ module Stackify::Metrics
         #only getting metrics less than 10 minutes old to drop old data in case we get backed up
         #they are removed from the @aggregated_metrics in the upload function upon success
         all_success = upload_aggregates(first_50_metrics.select { |_key, aggr| aggr.occurred_utc > current_time - 10.minutes })
+        all_success.map {|key, _aggr| @aggregate_metrics[key].occurred_utc = current_time }
       end
       @aggregate_metrics.delete_if { |_key, aggr| aggr.occurred_utc < purge_older_than }
     end
@@ -172,6 +173,7 @@ module Stackify::Metrics
           end
           agg_key = agg.aggregate_key
           unless @aggregate_metrics.has_key? agg_key
+            agg.occurred_utc = current_time - 60
             agg.name_key = aggregate.name_key
             Stackify.internal_log :debug, 'Creating 0 default value for ' + agg_key
             @aggregate_metrics[agg_key] = agg
