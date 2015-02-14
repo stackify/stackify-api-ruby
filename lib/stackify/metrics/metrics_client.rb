@@ -60,83 +60,41 @@ module Stackify::Metrics
       #read everything up to the start of the current minute
       read_queued_metrics_batch current_time
       handle_zero_reports current_time
-      get_for_recent = @aggregate_metrics.select do |_k, v|
-        v.occurred_utc < current_time && v.occurred_utc > current_time - 5.minutes
-      end
-      set_latest_aggregates get_for_recent
+
       selected_aggr_metrics = @aggregate_metrics.select { |_key, aggr| aggr.occurred_utc < current_time }
       first_50_metrics = Hash[selected_aggr_metrics.to_a.take 50]
       if first_50_metrics.length > 0
         #only getting metrics less than 10 minutes old to drop old data in case we get backed up
         #they are removed from the @aggregated_metrics in the upload function upon success
-        all_success = upload_aggregates(first_50_metrics.select { |_key, aggr| aggr.occurred_utc > current_time - 10.minutes })
-        all_success.map {|key, _aggr| @aggregate_metrics[key].occurred_utc = current_time }
+        upload_aggregates(first_50_metrics.select { |_key, aggr| aggr.occurred_utc > current_time - 10.minutes })
       end
       @aggregate_metrics.delete_if { |_key, aggr| aggr.occurred_utc < purge_older_than }
     end
 
-    def read_queued_metrics_batch chosen_time
-      batches = {}
-
+    def read_queued_metrics_batch current_time
       while  @metrics_queue.size > 0 do
+        break if Stackify::Utils.rounded_current_time.to_i != current_time.to_i
         metric = @metrics_queue.pop
         metric.calc_and_set_aggregate_key
-        unless batches.has_key? metric.aggregate_key
-          name_key = metric.calc_name_key
-          if metric.is_increment && @last_aggregates.has_key?(name_key)
-            #if wanting to do increments we need to grab the last value so we know what to increment
-            metric.value = @last_aggregates[name_key].value
-          end
-          batches[metric.aggregate_key] = MetricAggregate.new metric
-          #if it is nil don't do anything
-          #we are doing it where the aggregates are created so we don't do it one very single metric,
-          #just once per batch to optimize performance
-
-          @metric_settings[name_key] = metric.settings if metric.settings != nil
+        metric_for_aggregation = MetricAggregate.new(metric)
+        name_key = metric.calc_name_key
+        if @last_aggregates.has_key?(name_key) &&
+            (metric.is_increment || @last_aggregates[name_key].occurred_utc.to_i == current_time.to_i)
+          metric_for_aggregation.value = @last_aggregates[name_key].value
+          metric_for_aggregation.count = @last_aggregates[name_key].count
         end
-        batches[metric.aggregate_key].count += 1
-        if metric.is_increment
-          #add or subtract
-          batches[metric.aggregate_key].value += metric.value
-        elsif metric.metric_type == Stackify::Metrics::METRIC_TYPES[:metric_last]
-          #should end up the last value
-          batches[metric.aggregate_key].value = metric.value
+
+        @metric_settings[name_key] = metric.settings if metric.settings != nil
+
+        if metric.metric_type == Stackify::Metrics::METRIC_TYPES[:metric_last] && !metric.is_increment
+          metric_for_aggregation.value = metric.value
+          metric_for_aggregation.count = 1
         else
-          batches[metric.aggregate_key].value += metric.value
+          metric_for_aggregation.value += metric.value
+          metric_for_aggregation.count += 1
         end
-        #we don't need anything more this recent so bail
-        break if metric.occurred > chosen_time
+        @last_aggregates[name_key] = @aggregate_metrics[metric.aggregate_key] = metric_for_aggregation
       end
-      batches.each_pair do |_key, aggregated_metric|
-        aggregate aggregated_metric
-      end
-    end
-
-    def aggregate am
-      agg_key = am.aggregate_key
-      if @aggregate_metrics.has_key? agg_key
-        agg = @aggregate_metrics[agg_key]
-      else
-        if @aggregate_metrics.length > 1000
-          str = 'No longer aggregating new metrics because more than 1000 are queued'
-          Stackify.internal_log :warn, str
-          return
-        end
-        Stackify.internal_log :debug, 'Creating aggregate for ' + agg_key
-        @aggregate_metrics[agg_key] = am
-        agg = Stackify::Metrics::Metric.new am.category, am.name, am.metric_type
-        agg = MetricAggregate.new agg
-        agg.occurred_utc = am.occurred_utc
-      end
-
-      if am.metric_type == Stackify::Metrics::METRIC_TYPES[:metric_last]
-        agg.count = 1
-        agg.value = am.value
-      else
-        agg.count += am.count
-        agg.value += am.value
-      end
-      @aggregate_metrics[agg_key]= agg
     end
 
     def submit_metrics_task
@@ -153,29 +111,31 @@ module Stackify::Metrics
             @metric_settings.delete[aggregate.name_key]
             next
           end
-          #agg = MetricAggregate.new aggregate.category, aggregate.name, aggregate.metric_type
-          agg = aggregate
+          agg = aggregate.dup
           agg.occurred_utc = current_time
-          case aggregate.metric_type
-          when Stackify::Metrics::METRIC_TYPES[:metric_last]
-            settings.autoreport_last_value_if_nothing_reported = false #do not allow this
-          when Stackify::Metrics::METRIC_TYPES[:counter]
+
+          disabled_autoreport_last = [
+              Stackify::Metrics::METRIC_TYPES[:counter],
+              Stackify::Metrics::METRIC_TYPES[:timer]
+          ]
+          if disabled_autoreport_last.include? aggregate.metric_type
             settings.autoreport_last_value_if_nothing_reported = false #do not allow this
           end
+
           if settings.autoreport_zero_if_nothing_reported
-            agg.count = 1
+            agg.count = 0
             agg.value = 0
           elsif settings.autoreport_last_value_if_nothing_reported
-            agg.count = aggregate.value.to_i
+            agg.count = aggregate.count.to_i
             agg.value = aggregate.value
           else
             next
           end
           agg_key = agg.aggregate_key
           unless @aggregate_metrics.has_key? agg_key
-            agg.occurred_utc = current_time - 60
             agg.name_key = aggregate.name_key
-            Stackify.internal_log :debug, 'Creating 0 default value for ' + agg_key
+            agg.sent = false
+            Stackify.internal_log :debug, 'Creating default value for ' + agg_key
             @aggregate_metrics[agg_key] = agg
           end
         end
@@ -194,11 +154,6 @@ module Stackify::Metrics
     end
 
     def upload_aggregates aggr_metrics
-      s = ''
-      aggr_metrics.each_pair do |_k, m|
-        s = s + m.inspect.to_s + "\n --------------------------- \n"
-      end
-      Stackify.internal_log :debug, "Uploading Aggregate Metrics at #{ Time.now }: \n" + s
       all_success = true
       aggr_metrics.each_pair do |_key, metric|
         if @monitor_ids.has_key? metric.name_key
@@ -230,8 +185,7 @@ module Stackify::Metrics
 
         #get identified once
         aggr_metrics_for_upload = aggr_metrics.select { |_key, aggr_metric| !aggr_metric.monitor_id.nil? }
-        response = @metrics_sender.upload_metrics aggr_metrics_for_upload
-        Stackify.internal_log :info, 'Metrics are uploaded successfully' if response.try(:status) == 200
+        @metrics_sender.upload_metrics aggr_metrics_for_upload
         all_success
       end
     end
