@@ -67,6 +67,10 @@ module Stackify
         avarage_time category, metric_name, time_taken, advanced_settings
       end
 
+      def time_duration category, metric_name, duration_time, advanced_settings = nil
+        avarage_time category, metric_name, duration_time, advanced_settings
+      end
+
       def avarage_time category, metric_name, elapsed_time, advanced_settings = nil
         m = Metric.new category, metric_name, Stackify::Metrics::METRIC_TYPES[:counter_time]
         m.value = elapsed_time.round #seconds

@@ -13,14 +13,19 @@ module Stackify::Metrics
 
     def upload_metrics aggr_metrics
       return true if aggr_metrics.nil? || aggr_metrics.length == 0
+      current_time = Stackify::Utils.rounded_current_time
       if Stackify.authorized?
         records = []
         aggr_metrics.each_pair do |_key, metric|
+          next if metric.sent || metric.occurred_utc.to_i >= current_time.to_i
           records << Stackify::Metrics::MetricForSubmit.new(metric).to_h
-          prms = [metric.category, metric.name, metric.count, metric.value, metric.monitor_id ]
-          Stackify.internal_log :debug, 'Uploading metric: %s: %s count %s, value %s, ID %s' %  prms
+          metric.sent = true
         end
-        send_request SUBMIT_METRIS_URI, records.to_json
+        if records.any?
+          Stackify.internal_log :debug, "Uploading Aggregate Metrics at #{ Time.now }: \n" + JSON.pretty_generate(records)
+          response = send_request SUBMIT_METRIS_URI, records.to_json
+          Stackify.internal_log :info, 'Metrics are uploaded successfully' if response.try(:status) == 200
+        end
       else
         Stackify.log_internal_error "Uploading of metrics is failed because of authorization failure"
       end

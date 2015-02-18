@@ -2,7 +2,7 @@ module Stackify::Metrics
   class MetricAggregate
 
     attr_accessor :name, :category, :value, :count, :occurred_utc,
-                  :monitor_id, :metric_type, :name_key
+                  :monitor_id, :metric_type, :name_key, :sent, :is_increment
 
     def initialize metric
       @name = metric.name
@@ -12,6 +12,8 @@ module Stackify::Metrics
       @count = 0
       @occurred_utc = metric.get_rounded_time
       @name_key = metric.calc_name_key
+      @sent = false
+      @is_increment = metric.is_increment
     end
 
     def aggregate_key
