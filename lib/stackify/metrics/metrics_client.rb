@@ -61,7 +61,7 @@ module Stackify::Metrics
       read_queued_metrics_batch current_time
       handle_zero_reports current_time
 
-      selected_aggr_metrics = @aggregate_metrics.select { |_key, aggr| aggr.occurred_utc < current_time }
+      selected_aggr_metrics = @aggregate_metrics.select { |_key, aggr| aggr.occurred_utc.to_i < current_time.to_i && !aggr.sent }
       first_50_metrics = Hash[selected_aggr_metrics.to_a.take 50]
       if first_50_metrics.length > 0
         #only getting metrics less than 10 minutes old to drop old data in case we get backed up
@@ -111,7 +111,7 @@ module Stackify::Metrics
             @metric_settings.delete[aggregate.name_key]
             next
           end
-          agg = aggregate.dup
+          agg = aggregate.clone
           agg.occurred_utc = current_time
 
           disabled_autoreport_last = [
@@ -182,12 +182,12 @@ module Stackify::Metrics
         else
           metric.monitor_id = mon_info['MonitorID']
         end
-
-        #get identified once
-        aggr_metrics_for_upload = aggr_metrics.select { |_key, aggr_metric| !aggr_metric.monitor_id.nil? }
-        @metrics_sender.upload_metrics aggr_metrics_for_upload
-        all_success
       end
+
+      #get identified once
+      aggr_metrics_for_upload = aggr_metrics.select { |_key, aggr_metric| !aggr_metric.monitor_id.nil? }
+      @metrics_sender.upload_metrics aggr_metrics_for_upload
+      all_success
     end
   end
 end
