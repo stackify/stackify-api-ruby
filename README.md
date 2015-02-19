@@ -12,35 +12,9 @@ http://www.stackify.com/sign-up/
 
 Requirements: Ruby 1.9/2.0/2.1, Rails 3.x/4.x
 
-## Installation
-
-TODO
+## Installation and Configuration
 
 ### Rails
-
-TODO
-
-### Non-Rails
-
-TODO
-
-## Configuration
-
-TODO
-
-## Log API Usage
-
-TODO
-
-## Metrics API Usage
-
-TODO
-
-
-Rails Installation
-------------------
-
-### Rails 3.x/4.x
 
 Add the stackify gem to your Gemfile. In Gemfile:
 
@@ -50,7 +24,7 @@ Run the bundle command to install it:
 
     $ bundle
 
-Or install it manually:
+or install it manually:
 
     $ gem install stackify-api-ruby
 
@@ -60,21 +34,7 @@ After you install stackify-api-ruby you need to run the generator:
 
 The generator creates a file 'config/initializers/stackify.rb' configuring stackify-api-ruby with your API key. You can change default settings there.
 
-Usage: Logging
-------------------
-### Rails Environment
-
-stackify-api-ruby starts with start of Rails. Every error, which occurs within your application, will be caught and sent to Stackify automatically. The same situation with logs - you just use the Rails logger as usual:
-
-    Rails.logger.info "Some log message"
-
-If you want to redefine <b>logger</b>, you should add
-
-    config.logger = ::Stackify::LoggerProxy.new(ActiveSupport::Logger.new(File.join(Rails.root, 'log', "#{Rails.env}.log")))
-
-to your config/environments/%environment%. <b>Note:</b> in this case Stackify#config.log_level will affect entire system.
-
-### Other Environment
+### Non-Rails
 
 For using stackify-api-ruby gem within any Ruby application add to top of your main file:
 
@@ -86,10 +46,9 @@ After that you need to make base configuration:
       config.api_key = "your_api_key"
       config.env = :development
       config.app_name = "Your app name"
-      config.app_location = "/somewhere/public"
     end
 
-"api_key" - it's you key for Stackify. "app-location" - it's location of your application for Nginx/Apache(for Nginx it's value of 'root', for Apache it's value of 'DocumentRoot' at config files).
+## Optional Configuration
 
 Gem has 3 modes of work - "both", "logging", "metrics". Mode "both" turns on both parts of gem - logging and metrics.
 If you need ONLY logging or metrics use "logging" or "metrics" mode accordingly.
@@ -100,18 +59,32 @@ If you want to use proxy for sending request, you can do it in such way:
 
     config.proxy = { uri: '127.0.0.1:8118', user: 'user_name', password: 'some_password' }
 
+## Log API Usage
+
+### Rails
+
+stackify-api-ruby starts with start of Rails. Every error, which occurs within your application, will be caught and sent to Stackify automatically. The same situation with logs - you just use the Rails logger as usual:
+
+    Rails.logger.info "Some log message"
+
+If you want to redefine <b>logger</b>, you should add
+
+    config.logger = ::Stackify::LoggerProxy.new(ActiveSupport::Logger.new(File.join(Rails.root, 'log', "#{Rails.env}.log")))
+
+to your config/environments/%environment%. <b>Note:</b> in this case Stackify#config.log_level will affect entire system.
+
+### Non-Rails
+
 After logs configuring you should wrap up your logger:
 
     logger = Logger.new('mylog.log')
     logger = Stackify::LoggerProxy.new(logger)
 
-
 And last thing you need to do - call method "run":
 
     Stackify.run #remember that this call is running in the background of your main script
 
-Usage: Metrics
-------------------
+## Metrics API Usage
 
 There are four different types of metrics:
 
