@@ -10,9 +10,9 @@ Sign Up for a Trial:
 
 http://www.stackify.com/sign-up/
 
-Requirements: Ruby 1.9/2.0/2.1, Rails 3.x/4.x
-
 ## Installation and Configuration
+
+Requirements: Ruby 1.9/2.0/2.1, Rails 3.x/4.x (optional)
 
 ### Rails
 
