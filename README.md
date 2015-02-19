@@ -114,7 +114,7 @@ There are four different types of metrics:
 
 We can configure every metric with settings:
 
-        settings = MetricSettings.new
+        settings = Stackify::Metrics::MetricSettings.new
         settings.autoreport_zero_if_nothing_reported = true
         # or
         settings.autoreport_last_value_if_nothing_reported = true
