@@ -17,11 +17,8 @@ module Stackify
       @send_interval = 60
       @log_level = :info
       @mode = MODES[:both]
-      @logger = if defined? Rails
-        Logger.new(File.join(Rails.root, 'log', 'stackify.log'))
-      else
-        Logger.new('stackify.log')
-      end
+      @logger = Logger.new(STDOUT)
+      @logger.level = Logger::UNKNOWN
     end
 
     def is_valid?
