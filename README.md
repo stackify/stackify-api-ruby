@@ -1,7 +1,14 @@
-# Stackify
+# stackify-api-ruby
 
 Stackify Logs and Metrics API for Ruby
 
+Errors and Logs Overview:
+
+http://docs.stackify.com/m/7787/l/189767
+
+Sign Up for a Trial:
+
+http://www.stackify.com/sign-up/
 
 Rails Installation
 ------------------
