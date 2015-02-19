@@ -73,11 +73,6 @@ If you want to use proxy for sending request, you can do it in such way:
 
     config.proxy = { uri: '127.0.0.1:8118', user: 'user_name', password: 'some_password' }
 
-For internal logging stackify-api-ruby you can use such logger:
-
-    config.logger = Logger.new(File.join(Rails.root, "log", "stackify.log"))
-    config.logger.level = Logger::DEBUG
-
 After logs configuring you should wrap up your logger:
 
     logger = Logger.new('mylog.log')
@@ -135,18 +130,35 @@ Also there are two methods for getting last values of metrics:
 
 - get_latest_all_metrics - return all values of existed metrics
 
-    ``` Stackify::Metrics.get_latest_all_metrics```
+    ``` Stackify::Metrics.get_latest_all_metrics ```
 
 ## Requirements
+
 Ruby: 1.9/2.0/2.1
 
 Rails: 3.x/4.x
 
-Contributing
-------------------
+## Troubleshooting
 
-1. Fork it ( https://github.com/[my-github-username]/stackify/fork )
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create a new Pull Request
+If there are problems, you can enable internal logging of the stackify-api-ruby project. Uncomment out the config.logger and config.logger.level lines in the 'config/initializers/stackify.rb' file:
+
+```
+config.logger = Logger.new(File.join(Rails.root, "log", "stackify.log"))
+config.logger.level = Logger::DEBUG
+```
+
+## License
+
+Copyright 2015 Stackify, LLC.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
