@@ -105,6 +105,8 @@ There are four different types of metrics:
 
         t = Time.now
         Stackify::Metrics.time "MyCategory", "ElapsedTime", t
+        # or
+        Stackify::Metrics.time_duration "MyCategory", "ElapsedTime", 5.seconds
 
 - **Counter and Timer**: Composite of the Counter and Timer metrics for convenience
 
