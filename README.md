@@ -10,6 +10,12 @@ Sign Up for a Trial:
 
 http://www.stackify.com/sign-up/
 
+## Requirements
+
+Ruby: 1.9/2.0/2.1
+
+Rails: 3.x/4.x
+
 Rails Installation
 ------------------
 
@@ -131,12 +137,6 @@ Also there are two methods for getting last values of metrics:
 - get_latest_all_metrics - return all values of existed metrics
 
     ``` Stackify::Metrics.get_latest_all_metrics ```
-
-## Requirements
-
-Ruby: 1.9/2.0/2.1
-
-Rails: 3.x/4.x
 
 ## Troubleshooting
 
