@@ -12,9 +12,9 @@ http://www.stackify.com/sign-up/
 
 Requirements:
 
-Ruby: 1.9/2.0/2.1
+Ruby 1.9/2.0/2.1
 
-Rails: 3.x/4.x
+Rails 3.x/4.x
 
 Rails Installation
 ------------------
@@ -127,16 +127,6 @@ We can configure every metric with settings:
         Stackify::Metrics.set_gauge "MyCategory", "MyGauge", 100 , settings
 
 Note, "autoreport_last_value_if_nothing_reported" property has influence only on "average" metric.
-
-Also there are two methods for getting last values of metrics:
-
-- get_latest - return last value of certain metric
-
-    ``` Stackify::Metrics.get_latest "MyCategory", "MyCounter" ```
-
-- get_latest_all_metrics - return all values of existed metrics
-
-    ``` Stackify::Metrics.get_latest_all_metrics ```
 
 ## Troubleshooting
 
