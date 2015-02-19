@@ -1,6 +1,6 @@
 # stackify-api-ruby
 
-Stackify Logs and Metrics API for Ruby
+Stackify Logs and Metrics API for Ruby.
 
 Errors and Logs Overview:
 
@@ -10,7 +10,7 @@ Sign Up for a Trial:
 
 http://www.stackify.com/sign-up/
 
-## Requirements
+Requirements:
 
 Ruby: 1.9/2.0/2.1
 
