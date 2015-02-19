@@ -10,11 +10,32 @@ Sign Up for a Trial:
 
 http://www.stackify.com/sign-up/
 
-Requirements:
+Requirements: Ruby 1.9/2.0/2.1, Rails 3.x/4.x
 
-Ruby 1.9/2.0/2.1
+## Installation
 
-Rails 3.x/4.x
+TODO
+
+### Rails
+
+TODO
+
+### Non-Rails
+
+TODO
+
+## Configuration
+
+TODO
+
+## Log API Usage
+
+TODO
+
+## Metrics API Usage
+
+TODO
+
 
 Rails Installation
 ------------------
