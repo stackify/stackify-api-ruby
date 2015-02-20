@@ -5,7 +5,7 @@ require 'stackify/version'
 
 Gem::Specification.new do |spec|
   spec.name          = 'stackify-api-ruby'
-  spec.version       = '1.0.3'
+  spec.version       = Stackify::VERSION
   spec.authors       = ['Stackify']
   spec.email         = ['support@stackify.com']
   spec.summary       = 'Stackify API for Ruby'
