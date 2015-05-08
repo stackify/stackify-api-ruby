@@ -7,7 +7,7 @@ module Stackify
 
     def log level, msg, call_trace
       Stackify::Utils.do_only_if_authorized_and_mode_is_on Stackify::MODES[:logging] do
-        if acceptable? level, msg && Stackify.working?
+        if acceptable?(level, msg) && Stackify.working?
           worker = Stackify::AddMsgWorker.new
           task = log_message_task level, msg, call_trace
           worker.async_perform ScheduleDelay.new, task
@@ -18,7 +18,7 @@ module Stackify
     def log_exception level= :error, ex
       if ex.is_a?(Stackify::StackifiedError)
         Stackify::Utils.do_only_if_authorized_and_mode_is_on Stackify::MODES[:logging] do
-          if acceptable? level, ex.message && Stackify.working?
+          if acceptable?(level, ex.message) && Stackify.working?
             if @@errors_governor.can_send? ex
               worker = Stackify::AddMsgWorker.new
               task = log_exception_task level, ex
