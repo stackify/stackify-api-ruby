@@ -1,5 +1,7 @@
 # stackify-api-ruby
 
+[![Gem Version](https://badge.fury.io/rb/stackify-api-ruby.svg)](http://badge.fury.io/rb/stackify-api-ruby)
+
 Stackify Logs and Metrics API for Ruby.
 
 Errors and Logs Overview:
