@@ -38,8 +38,7 @@ module Stackify
 
     def acceptable? level, msg
       Stackify.is_valid? && is_correct_log_level?(level) &&
-        is_not_internal_log_message?(msg) &&
-        is_appropriate_env?
+        is_not_internal_log_message?(msg)
     end
 
     def is_not_internal_log_message? msg
@@ -50,10 +49,6 @@ module Stackify
       config_level = Logger.const_get Stackify.configuration.log_level.to_s.upcase
       current_level = Logger.const_get level.to_s.upcase
       current_level >= config_level
-    end
-
-    def is_appropriate_env?
-      Stackify.configuration.env.downcase.to_sym == Stackify::EnvDetails.instance.auth_info['ConfiguredEnvironmentName'].downcase.to_sym
     end
 
     def log_message_task level, msg, call_trace
