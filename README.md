@@ -71,7 +71,7 @@ stackify-api-ruby starts with start of Rails. Every error, which occurs within y
 
 If you want to redefine <b>logger</b>, you should add
 
-    config.logger = ::Stackify::LoggerProxy.new(ActiveSupport::Logger.new(File.join(Rails.root, 'log', "#{Rails.env}.log")))
+    config.logger = ::Stackify::LoggerProxy.new(ActiveSupport::Logger.new(Rails.root.join('log', "#{Rails.env}.log")))
 
 to your config/environments/%environment%. <b>Note:</b> in this case Stackify#config.log_level will affect entire system.
 
@@ -129,7 +129,7 @@ Note, "autoreport_last_value_if_nothing_reported" property has influence only on
 If there are problems, you can enable internal logging of the stackify-api-ruby project. Uncomment out the config.logger and config.logger.level lines in the 'config/initializers/stackify.rb' file:
 
 ```
-config.logger = Logger.new(File.join(Rails.root, "log", "stackify.log"))
+config.logger = Logger.new(Rails.root.join("log", "stackify.log"))
 config.logger.level = Logger::DEBUG
 ```
 
