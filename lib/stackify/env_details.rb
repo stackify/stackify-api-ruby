@@ -6,6 +6,10 @@ module Stackify
     include Singleton
     attr_reader :request_details
 
+    @@masked_headers = %w(HTTP_AUTHORIZATION HTTP_COOKIE)
+    @@masked_value = 'X-MASKED-X'
+
+
     def initialize
       rails_info = defined?(Rails) ? Rails::Info.properties.to_h : nil
       @info =  rails_info || { 'Application root' => Dir.pwd, 'Environment' => 'development'}
@@ -77,7 +81,8 @@ module Stackify
     end
 
     def headers env
-      env.reject{ |k| !(k.start_with?'HTTP_') }
+      headers = env.reject{ |k| !(k.start_with?'HTTP_') }
+      headers.each_key { | key | headers[key] = @@masked_value if @@masked_headers.include?(key) }
     end
 
     def server_variables env
