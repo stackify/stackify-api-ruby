@@ -14,11 +14,14 @@ module Stackify::Metrics
     def upload_metrics aggr_metrics
       return true if aggr_metrics.nil? || aggr_metrics.length == 0
       current_time = Stackify::Utils.rounded_current_time
+      device_id = Stackify::EnvDetails.instance.auth_info['DeviceID']
       if Stackify.authorized?
         records = []
         aggr_metrics.each_pair do |_key, metric|
           next if metric.sent || metric.occurred_utc.to_i >= current_time.to_i
-          records << Stackify::Metrics::MetricForSubmit.new(metric).to_h
+          record = Stackify::Metrics::MetricForSubmit.new(metric).to_h
+          record['ClientDeviceID'] = device_id if !device_id.nil?
+          records << record
           metric.sent = true
         end
         if records.any?
