@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.summary       = 'Stackify API for Ruby'
   spec.description   = 'Stackify Logs and Metrics API for Ruby'
   spec.homepage      = 'http://www.stackify.com/'
-  spec.license       = 'Apache'
+  spec.license       = 'Apache-2.0'
   spec.required_ruby_version = '~> 1.9', '~> 2.0'
 
   spec.files         = `git ls-files -z`.split("\x0")
@@ -21,5 +21,5 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency 'bundler', '~> 1.6'
   spec.add_development_dependency 'rake', '~> 0'
-  spec.add_runtime_dependency 'faraday', '>= 0.8'
+  spec.add_runtime_dependency 'faraday', '~> 0.8'
 end
