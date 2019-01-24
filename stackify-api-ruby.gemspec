@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.description   = 'Stackify Logs and Metrics API for Ruby'
   spec.homepage      = 'http://www.stackify.com/'
   spec.license       = 'Apache-2.0'
-  spec.required_ruby_version = '~> 1.9', '~> 2.0'
+  spec.required_ruby_version = '>= 1.9'
 
   spec.files         = `git ls-files -z`.split("\x0")
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
