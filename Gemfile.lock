@@ -1,13 +1,13 @@
 PATH
   remote: .
   specs:
-    stackify-api-ruby (1.0.8)
-      faraday (>= 0.8)
+    stackify-api-ruby (1.0.10)
+      faraday (~> 0.8)
 
 GEM
   remote: https://rubygems.org/
   specs:
-    faraday (0.9.1)
+    faraday (0.15.4)
       multipart-post (>= 1.2, < 3)
     multipart-post (2.0.0)
     rake (0.9.6)
@@ -21,4 +21,4 @@ DEPENDENCIES
   stackify-api-ruby!
 
 BUNDLED WITH
-   1.10.6
+   1.16.0
