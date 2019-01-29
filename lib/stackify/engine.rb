@@ -10,7 +10,7 @@ module Stackify
       end
 
       initializer 'stackify.middleware', group: :all do |app|
-        app.config.app_middleware.use 'Stackify::ErrorsCatcher' do |env|
+        app.config.app_middleware.use Stackify::ErrorsCatcher do |env|
           Stackify::EnvDetails.instance.request_details = env
         end
       end
