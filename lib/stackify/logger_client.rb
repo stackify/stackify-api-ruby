@@ -51,7 +51,7 @@ module Stackify
       current_level >= config_level
     end
 
-    def log_message_task level, msg, call_trace
+    def log_message_task level, msg, call_trace, id=nil
       Stackify::ScheduleTask.new ({limit: 1}) do
         if %w(error fatal).include?(level)
           ex = if ruby_exception?(msg) && msg.class != Class
@@ -63,16 +63,16 @@ module Stackify
             e
           end
           ex = StackifiedError.new(ex, binding())
-          Stackify.msgs_queue << Stackify::MsgObject.new(level, ex.message, caller[0], ex).to_h
+          Stackify.msgs_queue << Stackify::MsgObject.new(level, ex.message, caller[0], id, ex).to_h
         else
-          Stackify.msgs_queue << Stackify::MsgObject.new(level, msg, caller[0]).to_h
+          Stackify.msgs_queue << Stackify::MsgObject.new(level, msg, caller[0], id).to_h
         end
       end
     end
 
-    def log_exception_task level, ex
+    def log_exception_task level, ex, id=nil
       Stackify::ScheduleTask.new ({limit: 1}) do
-        Stackify.msgs_queue << Stackify::MsgObject.new(level, ex.message, caller[0], ex).to_h
+        Stackify.msgs_queue << Stackify::MsgObject.new(level, ex.message, caller[0], id, ex).to_h
       end
     end
 
