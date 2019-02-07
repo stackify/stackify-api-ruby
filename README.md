@@ -36,6 +36,8 @@ After you install stackify-api-ruby you need to run the generator:
 
 The generator creates a file 'config/initializers/stackify.rb' configuring stackify-api-ruby with your API key. You can change default settings there.
 
+In your 'config/initializers/stackify.rb' file don't forget to add 'Stackify::EnvDetails.instance.set_rails_info'
+
 ### Non-Rails
 
 For using stackify-api-ruby gem within any Ruby application add to top of your main file:

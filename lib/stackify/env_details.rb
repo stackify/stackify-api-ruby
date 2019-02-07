@@ -11,6 +11,20 @@ module Stackify
 
 
     def initialize
+      @info =  { 'Application root' => Dir.pwd, 'Environment' => 'development'}
+      @request_details = {}
+      @app_name = app_name
+      app_location = Stackify.configuration.app_location || @info['Application root']
+      @details = {
+        'DeviceName' => Socket.gethostname,
+        'AppLocation' => app_location,
+        'AppName' => @app_name,
+        'ConfiguredAppName' => @app_name,
+        'ConfiguredEnvironmentName' =>@info['Environment']
+      }
+    end
+
+    def set_rails_info
       rails_info = defined?(Rails) ? Rails::Info.properties.to_h : nil
       @info =  rails_info || { 'Application root' => Dir.pwd, 'Environment' => 'development'}
       @request_details = {}
