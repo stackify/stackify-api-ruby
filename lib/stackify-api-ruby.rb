@@ -107,7 +107,7 @@ module Stackify
       if Stackify.is_valid?
         at_exit { make_remained_job }
         t1 = Thread.new { Stackify.authorize }
-        Stackify::EnvDetails.instance.set_rails_info if (Object.const_defined?('Rails::Info'))
+        Stackify::EnvDetails.instance.set_rails_info
         case Stackify.configuration.mode
         when MODES[:both]
           t2 = start_logging

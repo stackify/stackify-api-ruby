@@ -25,6 +25,13 @@ module Stackify
     end
 
     def set_rails_info
+      begin
+        if (!Object.const_defined?('Rails::Info'))
+          return
+        end
+      rescue NameError => exception
+        return
+      end
       rails_info = defined?(Rails) ? Rails::Info.properties.to_h : nil
       @info =  rails_info || { 'Application root' => Dir.pwd, 'Environment' => 'development'}
       @request_details = {}
