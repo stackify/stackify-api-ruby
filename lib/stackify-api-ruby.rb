@@ -44,6 +44,7 @@ module Stackify
     def setup
       @workers = []
       yield(configuration) if block_given?
+      Stackify::EnvDetails.instance.set_rails_info
       if configuration.is_valid?
         @status = STATUSES[:working]
       else
