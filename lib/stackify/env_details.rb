@@ -11,17 +11,7 @@ module Stackify
 
 
     def initialize
-      @info =  { 'Application root' => Dir.pwd, 'Environment' => 'development'}
-      @request_details = {}
-      @app_name = app_name
-      app_location = Stackify.configuration.app_location || @info['Application root']
-      @details = {
-        'DeviceName' => Socket.gethostname,
-        'AppLocation' => app_location,
-        'AppName' => @app_name,
-        'ConfiguredAppName' => @app_name,
-        'ConfiguredEnvironmentName' =>@info['Environment']
-      }
+      set_env_properties
     end
 
     def set_rails_info
@@ -32,7 +22,10 @@ module Stackify
       rescue NameError => exception
         return
       end
-      rails_info = defined?(Rails) ? Rails::Info.properties.to_h : nil
+      set_env_properties (defined?(Rails) ? Rails::Info.properties.to_h : nil)
+    end
+    
+    def set_env_properties (rails_info = nil)
       @info =  rails_info || { 'Application root' => Dir.pwd, 'Environment' => 'development'}
       @request_details = {}
       @app_name = app_name
