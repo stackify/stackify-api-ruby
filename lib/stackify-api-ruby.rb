@@ -106,7 +106,7 @@ module Stackify
     def run async = true
       if Stackify.is_valid?
         at_exit { make_remained_job }
-        t1 = Thread.new { Stackify.authorize }
+         t1 = Thread.new { Stackify.authorize }
         case Stackify.configuration.mode
         when MODES[:both]
           t2 = start_logging

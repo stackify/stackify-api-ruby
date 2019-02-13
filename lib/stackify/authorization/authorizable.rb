@@ -11,6 +11,7 @@ module Stackify::Authorizable
     @@auth_client = nil
 
     def authorize attempts=3
+      Stackify::EnvDetails.instance.set_rails_info
       @@auth_lock.synchronize do
         return unless @@auth_client.nil?
         @@auth_client = Stackify::Authorizable::AuthorizationClient.new

@@ -11,7 +11,21 @@ module Stackify
 
 
     def initialize
-      rails_info = defined?(Rails) ? Rails::Info.properties.to_h : nil
+      set_env_properties
+    end
+
+    def set_rails_info
+      begin
+        if (!Object.const_defined?('Rails::Info'))
+          return
+        end
+      rescue NameError => exception
+        return
+      end
+      set_env_properties (defined?(Rails) ? Rails::Info.properties.to_h : nil)
+    end
+    
+    def set_env_properties (rails_info = nil)
       @info =  rails_info || { 'Application root' => Dir.pwd, 'Environment' => 'development'}
       @request_details = {}
       @app_name = app_name
