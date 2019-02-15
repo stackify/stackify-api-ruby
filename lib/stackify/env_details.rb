@@ -35,7 +35,7 @@ module Stackify
         'AppLocation' => app_location,
         'AppName' => @app_name,
         'ConfiguredAppName' => @app_name,
-        'ConfiguredEnvironmentName' =>@info['Environment']
+        'ConfiguredEnvironmentName' => Stackify.configuration.env || @info['Environment']
       }
     end
 
