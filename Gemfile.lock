@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    stackify-api-ruby (1.0.13)
+    stackify-api-ruby (1.0.14)
       faraday (~> 0.8)
 
 GEM
