@@ -6,7 +6,7 @@ module Stackify
       @logger.level = Logger.const_get(Stackify.configuration.log_level.to_s.upcase)
       %w(debug info warn error fatal unknown).each do |level|
         stackify_logger = if level == 'debug'
-          -> (msg, caller) { Stackify.logger_client.log(level.downcase, msg, caller) unless msg.empty? }
+          -> (msg, caller) { Stackify.logger_client.log(level.downcase, msg, caller) unless msg.to_s.empty? }
         else
           -> (msg, caller) { Stackify.logger_client.log(level.downcase, msg, caller) }
         end
