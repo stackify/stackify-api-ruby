@@ -10,7 +10,7 @@ module Stackify::Utils
   end
 
   def self.is_mode_on? mode
-    Stackify.configuration.mode == Stackify::MODES[:both] || Stackify.configuration.mode == mode
+    Stackify.configuration.mode = mode || Stackify::MODES[:both]
   end
 
   def self.do_only_if_authorized_and_mode_is_on mode, &block

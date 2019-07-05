@@ -103,7 +103,7 @@ module Stackify
       Stackify.logger.send(level.downcase.to_sym, Stackify::INTERNAL_LOG_PREFIX){ msg }
     end
 
-    def run async = true
+    def run
       if Stackify.is_valid?
         at_exit { make_remained_job }
          t1 = Thread.new { Stackify.authorize }
@@ -116,10 +116,9 @@ module Stackify
         when MODES[:metrics]
           t3 = start_metrics
         end
-        unless async
-          t1.join
-          t2.join if t2
-        end
+
+        t1.join
+        t3.join if t3
       else
         Stackify.log_internal_error "Stackify is not properly configured! Errors: #{Stackify.configuration.errors}"
       end

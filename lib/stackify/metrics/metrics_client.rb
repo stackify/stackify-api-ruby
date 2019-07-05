@@ -13,6 +13,7 @@ module Stackify::Metrics
     end
 
     def start
+      Stackify.internal_log :debug, '[MetricClient]: start'
       if Stackify::Utils.is_mode_on? Stackify::MODES[:metrics]
         worker = Stackify::Worker.new 'Metrics client - processing of metrics'
         Stackify.internal_log :debug, 'Metrics client: processing of metrics is started'

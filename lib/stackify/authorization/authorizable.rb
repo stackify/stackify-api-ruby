@@ -56,7 +56,5 @@ module Stackify::Authorizable
       return '' if r.nil?
       "Status: #{r.try(:status)}, Message: '#{r.try(:body)}'"
     end
-
   end
-
 end

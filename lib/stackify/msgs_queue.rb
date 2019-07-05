@@ -2,6 +2,8 @@ module Stackify
   class MsgsQueue < SizedQueue
     include MonitorMixin
 
+    attr_accessor :worker
+
     CHUNK_MIN_WEIGHT = 50
     ERROR_SIZE = 10
     LOG_SIZE = 1
@@ -9,22 +11,27 @@ module Stackify
 
     def initialize
       super(Stackify.configuration.queue_max_size)
+      start_worker
+    end
+
+    alias :old_push :push
+
+    def start_worker
       if Stackify::Utils.is_mode_on? Stackify::MODES[:logging]
         @send_interval = ScheduleDelay.new
-        worker = MsgsQueueWorker.new
+        @worker = MsgsQueueWorker.new
         task = update_send_interval_task
-        worker.async_perform @send_interval, task
+        @worker.async_perform @send_interval, task
       else
         Stackify.internal_log :warn, '[MsgsQueue]: Logging is disabled at configuration!'
       end
     end
 
-    alias :old_push :push
-
     def push_remained_msgs
+      Stackify.internal_log :debug, "[MsgsQueue] push_remained_msgs() alive? = #{@worker.alive?}"
       wait_until_all_workers_will_add_msgs
       self.synchronize do
-        Stackify.internal_log :info, 'All remained logs are going to be sent'
+        Stackify.internal_log :info, '[MsgsQueue] All remained logs are going to be sent'
         Stackify.shutdown_all
         if self.length > 0
           Stackify.logs_sender.send_logs(pop_all)
@@ -34,6 +41,11 @@ module Stackify
     end
 
     def add_msg msg
+      Stackify.internal_log :debug, "[MsgsQueue] add_msg() Is worker <#{@worker.name}> alive? = #{@worker.alive?}"
+      if !@worker.alive?
+        start_worker
+        Stackify.internal_log :debug, "[MsgsQueue] add_msg() Newly created worker <#{@worker.name}>"
+      end
       self.synchronize do
         Stackify::Utils.do_only_if_authorized_and_mode_is_on Stackify::MODES[:logging] do
           old_push(msg)
@@ -73,7 +85,6 @@ module Stackify
       Stackify::ScheduleTask.new properties do
         processed_count = calculate_processed_msgs_count
         i = @send_interval.update_by_sent_num! processed_count
-        Stackify.internal_log :debug, "MsgsQueue: send_interval is updated to #{i}"
         i
       end
     end
@@ -104,7 +115,6 @@ module Stackify
             break
           end
         end
-
         Stackify.logs_sender.send_logs(chunk) if chunk.length > 0
         chunk_weight
       end

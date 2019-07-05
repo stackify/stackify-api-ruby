@@ -31,6 +31,5 @@ module Stackify
         false
       end
     end
-
   end
 end

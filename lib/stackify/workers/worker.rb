@@ -10,6 +10,7 @@ module Stackify
       @name = name ? name : generate_name
       @name += " ##{self.id}"
       @scheduler = Stackify::Scheduler.new
+      Stackify.internal_log :info, "[Worker] Created worker: #{@name}"
       Stackify.add_dependant_worker self
     end
 

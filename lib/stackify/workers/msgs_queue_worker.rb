@@ -1,7 +1,7 @@
 module Stackify
   class MsgsQueueWorker < Worker
 
-    def initialize name = 'MsgsQueue worker'
+    def initialize name = '[MsgsQueueWorker]'
       super
       @type = :send_msgs
       Stackify.internal_log :info, "#{@name}: started sending logs"
