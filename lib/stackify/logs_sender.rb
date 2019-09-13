@@ -23,7 +23,7 @@ module Stackify
       Stackify::ScheduleTask.new properties do
         failure_msg = 'LogsSender: tried to send logs'
         Stackify.if_not_authorized failure_msg do
-          Stackify.internal_log :info, 'LogsSender: trying to send logs to Stackify...'
+          Stackify.internal_log :info, '[LogsSender] trying to send logs to Stackify...'
           send_request LOGS_URI, gather_and_pack_data(msgs).to_json
         end
       end

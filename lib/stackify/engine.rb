@@ -3,7 +3,6 @@ module Stackify
   class Engine < ::Rails::Engine
 
     if Rails.version > '3.1'
-
       initializer 'Stackify set up of logger', group: :all do
         ::Rails.logger = ::Stackify::LoggerProxy.new ::Rails.logger
         Stackify.run
