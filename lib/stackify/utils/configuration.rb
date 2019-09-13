@@ -3,7 +3,7 @@ module Stackify
   class Configuration
 
     attr_accessor :api_key, :app_name, :app_location, :env, :log_level, :logger,
-                  :proxy, :mode, :base_api_url
+                  :proxy, :mode, :base_api_url, :api_enabled
 
     attr_reader :errors, :send_interval, :flood_limit, :queue_max_size
 
@@ -15,6 +15,7 @@ module Stackify
       @flood_limit = 100
       @queue_max_size = 10000
       @send_interval = 60
+      @api_enabled = true
       @log_level = :info
       @mode = MODES[:both]
       @logger = Logger.new(STDOUT)

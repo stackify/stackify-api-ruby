@@ -104,23 +104,26 @@ module Stackify
     end
 
     def run
-      if Stackify.is_valid?
-        at_exit { make_remained_job }
-         t1 = Thread.new { Stackify.authorize }
-        case Stackify.configuration.mode
-        when MODES[:both]
-          t2 = start_logging
-          t3 = start_metrics
-        when MODES[:logging]
-          t2 = start_logging
-        when MODES[:metrics]
-          t3 = start_metrics
-        end
+      Stackify::Utils.is_api_enabled
+      if Stackify.configuration.api_enabled
+        if Stackify.is_valid?
+          at_exit { make_remained_job }
+           t1 = Thread.new { Stackify.authorize }
+          case Stackify.configuration.mode
+          when MODES[:both]
+            t2 = start_logging
+            t3 = start_metrics
+          when MODES[:logging]
+            t2 = start_logging
+          when MODES[:metrics]
+            t3 = start_metrics
+          end
 
-        t1.join
-        t3.join if t3
-      else
-        Stackify.log_internal_error "Stackify is not properly configured! Errors: #{Stackify.configuration.errors}"
+          t1.join
+          t3.join if t3
+        else
+          Stackify.log_internal_error "Stackify is not properly configured! Errors: #{Stackify.configuration.errors}"
+        end
       end
     end
 
