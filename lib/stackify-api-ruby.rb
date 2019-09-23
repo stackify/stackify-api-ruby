@@ -2,11 +2,15 @@ require 'stackify/version'
 require 'stackify/utils/methods'
 require 'core_ext/core_ext' unless defined? Rails
 
+require 'google/protobuf'
+require 'proto/stackify-agent.rb'
+
 module Stackify
 
   INTERNAL_LOG_PREFIX = '[Stackify]'.freeze
   STATUSES = { working: 'working', terminating: 'terminating', terminated: 'terminated'}
   MODES = { logging: :logging, metrics: :metrics, both: :both }
+  TRANSPORT = [DEFAULT = 'default', UNIX_SOCKET = 'agent_socket']
 
   autoload :Backtrace,            'stackify/utils/backtrace'
   autoload :MsgObject,            'stackify/utils/msg_object'
@@ -25,6 +29,7 @@ module Stackify
   autoload :MsgsQueue,            'stackify/msgs_queue'
   autoload :LoggerClient,         'stackify/logger_client'
   autoload :LogsSender,           'stackify/logs_sender'
+  autoload :UnixSocketSender,     'stackify/unix_socket_sender'
   autoload :LoggerProxy,          'stackify/logger_proxy'
   autoload :StackifiedError,      'stackify/error'
   autoload :StringException,      'stackify/error'
@@ -53,7 +58,6 @@ module Stackify
         end
         raise msg
       end
-
     end
 
     def msgs_queue
@@ -66,6 +70,10 @@ module Stackify
 
     def logs_sender
       @logs_sender ||= Stackify::LogsSender.new
+    end
+
+    def send_unix_socket
+      @unix_socket ||= Stackify::UnixSocketSender.new
     end
 
     def logger
@@ -105,24 +113,33 @@ module Stackify
 
     def run
       Stackify::Utils.is_api_enabled
+      puts 'run: ' + Stackify.configuration.transport
       if Stackify.configuration.api_enabled
-        if Stackify.is_valid?
-          at_exit { make_remained_job }
-           t1 = Thread.new { Stackify.authorize }
-          case Stackify.configuration.mode
-          when MODES[:both]
-            t2 = start_logging
-            t3 = start_metrics
-          when MODES[:logging]
-            t2 = start_logging
-          when MODES[:metrics]
-            t3 = start_metrics
+        # check transport types
+        case Stackify.configuration.transport
+        when Stackify::DEFAULT
+          puts 'run default here'
+          if Stackify.is_valid?
+            at_exit { make_remained_job }
+             t1 = Thread.new { Stackify.authorize }
+            case Stackify.configuration.mode
+            when MODES[:both]
+              t2 = start_logging
+              t3 = start_metrics
+            when MODES[:logging]
+              t2 = start_logging
+            when MODES[:metrics]
+              t3 = start_metrics
+            end
+  
+            t1.join
+            t3.join if t3
+          else
+            Stackify.log_internal_error "Stackify is not properly configured! Errors: #{Stackify.configuration.errors}"
           end
-
-          t1.join
-          t3.join if t3
-        else
-          Stackify.log_internal_error "Stackify is not properly configured! Errors: #{Stackify.configuration.errors}"
+        when Stackify::UNIX_SOCKET
+          # puts 'run socket here'
+          t2 = start_logging
         end
       end
     end

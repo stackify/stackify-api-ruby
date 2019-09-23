@@ -2,17 +2,29 @@ module Stackify
   class LoggerClient
 
     def initialize
+      # puts 'LoggerClient initialize'
       @@errors_governor = Stackify::ErrorsGovernor.new
     end
 
     def log level, msg, call_trace
-      Stackify::Utils.do_only_if_authorized_and_mode_is_on Stackify::MODES[:logging] do
+      puts "LoggerClient.log(): " + Stackify.configuration.transport
+      case Stackify.configuration.transport
+      when Stackify::DEFAULT
+        Stackify::Utils.do_only_if_authorized_and_mode_is_on Stackify::MODES[:logging] do
+          if acceptable?(level, msg) && Stackify.working?
+            worker = Stackify::AddMsgWorker.new
+            task = log_message_task level, msg, call_trace
+            worker.async_perform ScheduleDelay.new, task
+          end
+        end
+      when Stackify::UNIX_SOCKET
         if acceptable?(level, msg) && Stackify.working?
           worker = Stackify::AddMsgWorker.new
           task = log_message_task level, msg, call_trace
           worker.async_perform ScheduleDelay.new, task
         end
       end
+
     end
 
     def log_exception level= :error, ex

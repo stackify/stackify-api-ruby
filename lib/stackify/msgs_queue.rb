@@ -47,9 +47,10 @@ module Stackify
         Stackify.internal_log :debug, "[MsgsQueue] add_msg() Newly created worker <#{@worker.name}>"
       end
       self.synchronize do
-        Stackify::Utils.do_only_if_authorized_and_mode_is_on Stackify::MODES[:logging] do
-          old_push(msg)
-        end
+        # Stackify::Utils.do_only_if_authorized_and_mode_is_on Stackify::MODES[:logging] do
+        #   old_push(msg)
+        # end
+        old_push(msg)
       end
     end
 
@@ -108,6 +109,9 @@ module Stackify
         while(true)
           if length > 0
             msg = pop
+            # File.open("./MYLOG.txt", 'a') { |file|
+            #   file.puts msg
+            # }
             chunk << msg
             chunk_weight += (msg['Ex'].nil? ? LOG_SIZE : ERROR_SIZE)
             break if msg['EpochMs'] > started_at || CHUNK_MIN_WEIGHT > 50
@@ -115,7 +119,12 @@ module Stackify
             break
           end
         end
-        Stackify.logs_sender.send_logs(chunk) if chunk.length > 0
+        case Stackify.configuration.transport
+        when Stackify::DEFAULT
+          Stackify.logs_sender.send_logs(chunk) if chunk.length > 0
+        when Stackify::UNIX_SOCKET
+          Stackify.send_unix_socket.send_logs(chunk) if chunk.length > 0
+        end
         chunk_weight
       end
     end

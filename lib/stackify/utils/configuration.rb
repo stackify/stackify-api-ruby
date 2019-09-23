@@ -3,14 +3,17 @@ module Stackify
   class Configuration
 
     attr_accessor :api_key, :app_name, :app_location, :env, :log_level, :logger,
-                  :proxy, :mode, :base_api_url, :api_enabled
+                  :proxy, :mode, :base_api_url, :api_enabled, :transport
 
     attr_reader :errors, :send_interval, :flood_limit, :queue_max_size
 
     def initialize
-      @base_api_url = 'https://api.stackify.com'
+      # @base_api_url = 'https://api.stackify.com'
+      @base_api_url = 'https://qaapi.stackify.com'
       @errors = []
+      @app_name = ''
       @api_key = ''
+      @transport = 'default'
       @env = :production
       @flood_limit = 100
       @queue_max_size = 10000
@@ -24,7 +27,12 @@ module Stackify
 
     def is_valid?
       @errors = []
-      validate_mode if validate_config_types
+      case Stackify.configuration.transport
+      when Stackify::DEFAULT
+        validate_default_transport
+      when Stackify::UNIX_SOCKET
+        validate_unix_domain_socket_transport
+      end
       @errors.empty?
     end
 
@@ -36,6 +44,21 @@ module Stackify
       validate_mode_type
     end
 
+    def validate_default_transport
+      validate_app_name &&
+      validate_api_key &&
+      validate_env &&
+      validate_log_level &&
+      validate_mode_type
+    end
+
+    def validate_unix_domain_socket_transport
+      validate_env &&
+      validate_app_name &&
+      validate_log_level &&
+      validate_mode_type
+    end
+
     def validate_mode_type
       return true if @mode.is_a? Symbol
       @errors << 'Mode should be a Symbol'
@@ -43,7 +66,17 @@ module Stackify
 
     def validate_api_key
       return true if  @api_key.is_a?(String) && !@api_key.empty?
-      @errors << 'API_KEY should be a String and not empty'
+      @errors << 'Api_key should be a String and not empty'
+    end
+
+    def validate_app_name
+      return true if  @app_name.is_a?(String) && !@app_name.empty?
+      @errors << 'App_name should be a String and not empty'
+    end
+
+    def validate_env
+      return true if  @env.is_a?(Symbol) && !@env.empty?
+      @errors << 'Env should be a Symbol and not empty'
     end
 
     def validate_log_level
