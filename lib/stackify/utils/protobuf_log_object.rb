@@ -16,7 +16,6 @@ module Stackify
         log.source_line = Stackify::Backtrace.line_number(@caller_str).to_i
         log.transaction_id = @trans_id
         log.id = @log_uuid
-
         if @ex.try(:to_h)
           ex = @ex.try(:to_h)
           log_error = Stackify::LogGroup::Log::Error.new
@@ -37,7 +36,11 @@ module Stackify
             error_item.message = err['Message'].to_s
             error_item.error_type = err['ErrorType'].to_s
             error_item.error_type_code = err['ErrorTypeCode'].to_s
-            error_item.data = err['Data']
+            if err['Data']
+              map_data = Google::Protobuf::Map.new(:string, :string)
+              err['Data'].each { |key, value| map_data["#{key}"] = value }
+              error_item.data = map_data
+            end
             error_item.inner_error = err['InnerError']
             error_item.source_method = err['SourceMethod'].to_s
             if err['StackTrace']
@@ -62,6 +65,11 @@ module Stackify
             web_request.referral_url = req_details['ReferralUrl'].to_s
             web_request.post_data_raw = req_details['PostDataRaw'].to_s
             log_error.web_request_detail = web_request
+          end
+          if ex['ServerVariables']
+            map_server_vars = Google::Protobuf::Map.new(:string, :string)
+            ex['ServerVariables'].each { |key, value| map_server_vars["#{key.to_s}"] = value.to_s }
+            log_error.server_variables = map_server_vars
           end
 
           log.error = log_error
