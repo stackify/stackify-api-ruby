@@ -109,9 +109,6 @@ module Stackify
         while(true)
           if length > 0
             msg = pop
-            # File.open("./MYLOG.txt", 'a') { |file|
-            #   file.puts msg
-            # }
             chunk << msg
             chunk_weight += (msg['Ex'].nil? ? LOG_SIZE : ERROR_SIZE)
             break if msg['EpochMs'] > started_at || CHUNK_MIN_WEIGHT > 50

@@ -17,7 +17,7 @@ module Stackify
           log.source_method = msg['SrcMethod'].to_s
           log.source_line = msg['SrcLine'].to_i
           log.transaction_id = msg['TransID'].to_s
-          log.id = date_millis.to_s
+          log.id = msg['id'].to_s
 
           if msg['Ex']
             ex = msg['Ex']
@@ -80,7 +80,7 @@ module Stackify
         response = client.request(req)
         Stackify.internal_log :info, "[UnixSocketSender] Sending batch of msgs is successfully completed"
       rescue => exception
-        raise exception
+        Stackify.log_internal_error('[UnixSocketSender] send_logs() error: ', exception)
       end
     end
   end
