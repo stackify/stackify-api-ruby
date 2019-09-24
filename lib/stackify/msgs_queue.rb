@@ -47,10 +47,14 @@ module Stackify
         Stackify.internal_log :debug, "[MsgsQueue] add_msg() Newly created worker <#{@worker.name}>"
       end
       self.synchronize do
-        # Stackify::Utils.do_only_if_authorized_and_mode_is_on Stackify::MODES[:logging] do
-        #   old_push(msg)
-        # end
-        old_push(msg)
+        case Stackify.configuration.transport
+        when Stackify::DEFAULT
+          Stackify::Utils.do_only_if_authorized_and_mode_is_on Stackify::MODES[:logging] do
+            old_push(msg)
+          end
+        when Stackify::UNIX_SOCKET
+          old_push(msg)
+        end
       end
     end
 
@@ -106,23 +110,37 @@ module Stackify
       chunk = []
       started_at = Time.now.to_f * 1000
       self.synchronize do
-        while(true)
-          if length > 0
-            msg = pop
-            chunk << msg
-            chunk_weight += (msg['Ex'].nil? ? LOG_SIZE : ERROR_SIZE)
-            break if msg['EpochMs'] > started_at || CHUNK_MIN_WEIGHT > 50
-          else
-            break
+        begin
+          while(true)
+            if length > 0
+              begin
+                msg = pop
+                chunk << msg
+                case Stackify.configuration.transport
+                when Stackify::DEFAULT
+                  chunk_weight += (msg['Ex'].nil? ? LOG_SIZE : ERROR_SIZE)
+                  break if msg['EpochMs'] > started_at || CHUNK_MIN_WEIGHT > 50
+                when Stackify::UNIX_SOCKET
+                  chunk_weight += (msg.error.nil? ? LOG_SIZE : ERROR_SIZE)
+                  break if msg.date_millis > started_at || CHUNK_MIN_WEIGHT > 50
+                end
+              rescue => exception
+                Stackify.log_internal_error "[MsgsQueue] push_one_chunk() error: #{exception}"
+              end
+            else
+              break
+            end
           end
+          case Stackify.configuration.transport
+          when Stackify::DEFAULT
+            Stackify.logs_sender.send_logs(chunk) if chunk.length > 0
+          when Stackify::UNIX_SOCKET
+            Stackify.send_unix_socket.send_logs(chunk) if chunk.length > 0
+          end
+          chunk_weight
+        rescue => exception
+          Stackify.log_internal_error "[MsgsQueue] push_one_chunk() error: #{exception}"
         end
-        case Stackify.configuration.transport
-        when Stackify::DEFAULT
-          Stackify.logs_sender.send_logs(chunk) if chunk.length > 0
-        when Stackify::UNIX_SOCKET
-          Stackify.send_unix_socket.send_logs(chunk) if chunk.length > 0
-        end
-        chunk_weight
       end
     end
   end

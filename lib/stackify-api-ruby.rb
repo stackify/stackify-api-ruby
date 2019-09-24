@@ -14,6 +14,7 @@ module Stackify
 
   autoload :Backtrace,            'stackify/utils/backtrace'
   autoload :MsgObject,            'stackify/utils/msg_object'
+  autoload :ProtobufLogObject,    'stackify/utils/protobuf_log_object'
   autoload :Configuration,        'stackify/utils/configuration'
   autoload :HttpClient,           'stackify/http_client'
   autoload :Authorizable,         'stackify/authorization/authorizable'
@@ -118,7 +119,6 @@ module Stackify
         # check transport types
         case Stackify.configuration.transport
         when Stackify::DEFAULT
-          puts 'run default here'
           if Stackify.is_valid?
             at_exit { make_remained_job }
              t1 = Thread.new { Stackify.authorize }
@@ -131,14 +131,13 @@ module Stackify
             when MODES[:metrics]
               t3 = start_metrics
             end
-  
+
             t1.join
             t3.join if t3
           else
             Stackify.log_internal_error "Stackify is not properly configured! Errors: #{Stackify.configuration.errors}"
           end
         when Stackify::UNIX_SOCKET
-          # puts 'run socket here'
           t2 = start_logging
         end
       end

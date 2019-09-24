@@ -2,12 +2,10 @@ module Stackify
   class LoggerClient
 
     def initialize
-      # puts 'LoggerClient initialize'
       @@errors_governor = Stackify::ErrorsGovernor.new
     end
 
     def log level, msg, call_trace
-      puts "LoggerClient.log(): " + Stackify.configuration.transport
       case Stackify.configuration.transport
       when Stackify::DEFAULT
         Stackify::Utils.do_only_if_authorized_and_mode_is_on Stackify::MODES[:logging] do
@@ -24,7 +22,6 @@ module Stackify
           worker.async_perform ScheduleDelay.new, task
         end
       end
-
     end
 
     def log_exception level= :error, ex
@@ -39,12 +36,12 @@ module Stackify
                 worker.async_perform ScheduleDelay.new, task
               else
                 Stackify.internal_log :warn,
-                "LoggerClient: logging of exception with message \"#{ex.message}\" is skipped - flood_limit is exceeded"
+                "LoggerClient(DEFAULT): logging of exception with message \"#{ex.message}\" is skipped - flood_limit is exceeded"
               end
             end
           end
         else
-          Stackify.log_internal_error 'LoggerClient: log_exception should get StackifiedError object'
+          Stackify.log_internal_error 'LoggerClient(DEFAULT): log_exception should get StackifiedError object'
         end
       when Stackify::UNIX_SOCKET
         if ex.is_a?(Stackify::StackifiedError)
@@ -55,12 +52,11 @@ module Stackify
               worker.async_perform ScheduleDelay.new, task
             else
               Stackify.internal_log :warn,
-              "LoggerClient: logging of exception with message \"#{ex.message}\" is skipped - flood_limit is exceeded"
+              "LoggerClient(UNIX_SOCKET): logging of exception with message \"#{ex.message}\" is skipped - flood_limit is exceeded"
             end
           end
         end
       end
-
     end
 
     private
@@ -92,16 +88,31 @@ module Stackify
             e
           end
           ex = StackifiedError.new(ex, binding())
-          Stackify.msgs_queue << Stackify::MsgObject.new(level, ex.message, caller[0], trans_id, log_uuid, ex).to_h
+          case Stackify.configuration.transport
+          when Stackify::DEFAULT
+            Stackify.msgs_queue << Stackify::MsgObject.new(level, ex.message, caller[0], trans_id, log_uuid, ex).to_h
+          when Stackify::UNIX_SOCKET
+            Stackify.msgs_queue << Stackify::ProtobufLogObject.new(level, ex.message, caller[0], trans_id, log_uuid, ex).to_obj
+          end
         else
-          Stackify.msgs_queue << Stackify::MsgObject.new(level, msg, caller[0], trans_id, log_uuid).to_h
+          case Stackify.configuration.transport
+          when Stackify::DEFAULT
+            Stackify.msgs_queue << Stackify::MsgObject.new(level, msg, caller[0], trans_id, log_uuid).to_h
+          when Stackify::UNIX_SOCKET
+            Stackify.msgs_queue << Stackify::ProtobufLogObject.new(level, msg, caller[0], trans_id, log_uuid).to_obj
+          end
         end
       end
     end
 
     def log_exception_task level, ex, trans_id=nil, log_uuid=nil
       Stackify::ScheduleTask.new ({limit: 1}) do
-        Stackify.msgs_queue << Stackify::MsgObject.new(level, ex.message, caller[0], trans_id, log_uuid, ex).to_h
+        case Stackify.configuration.transport
+        when Stackify::DEFAULT
+          Stackify.msgs_queue << Stackify::MsgObject.new(level, ex.message, caller[0], trans_id, log_uuid, ex).to_h
+        when Stackify::UNIX_SOCKET
+          Stackify.msgs_queue << Stackify::ProtobufLogObject.new(level, ex.message, caller[0], trans_id, log_uuid, ex).to_obj
+        end
       end
     end
 
@@ -115,5 +126,4 @@ module Stackify
       klasses.include?(Exception)
     end
   end
-
 end
