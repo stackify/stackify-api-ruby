@@ -44,6 +44,8 @@ module Stackify
       validate_mode_type
     end
 
+    # Perform validation if transport type is default
+    # Required parameters are: env, app_name, api_key, log_level
     def validate_default_transport
       validate_app_name &&
       validate_api_key &&
@@ -52,6 +54,8 @@ module Stackify
       validate_mode_type
     end
 
+    # Perform validation if transport type is agent_socket
+    # Required parameters are: env, app_name, log_level
     def validate_unix_domain_socket_transport
       validate_env &&
       validate_app_name &&

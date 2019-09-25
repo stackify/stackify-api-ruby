@@ -114,7 +114,6 @@ module Stackify
 
     def run
       Stackify::Utils.is_api_enabled
-      puts 'run: ' + Stackify.configuration.transport
       if Stackify.configuration.api_enabled
         # check transport types
         case Stackify.configuration.transport
@@ -138,7 +137,14 @@ module Stackify
             Stackify.log_internal_error "Stackify is not properly configured! Errors: #{Stackify.configuration.errors}"
           end
         when Stackify::UNIX_SOCKET
-          t2 = start_logging
+          case Stackify.configuration.mode
+          when MODES[:logging]
+            start_logging
+          when MODES[:both]
+            start_logging
+          when MODES[:metrics]
+            Stackify.internal_log :info, '[MetricClient]: Not yet implemented.'
+          end
         end
       end
     end

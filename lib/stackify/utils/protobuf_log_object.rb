@@ -5,6 +5,7 @@ module Stackify
       @log_uuid = log_uuid
     end
 
+    # Create a LogMsgGroup Protobuf Object
     def to_obj
       begin
         log = Stackify::LogGroup::Log.new
