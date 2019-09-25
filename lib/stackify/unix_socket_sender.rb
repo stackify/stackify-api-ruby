@@ -55,7 +55,7 @@ module Stackify
         req.body = message
         response = client.request(req)
         if response.code.to_i == 200
-          Stackify.internal_log :info, "[UnixSocketSender]: Sending batch of msgs is successfully completed"
+          Stackify.internal_log :info, "[UnixSocketSender]: Successfully send message via unix domain socket."
           return OpenStruct.new({status: 200, message: 'OK'})
         else
           Stackify.internal_log :info, "[UnixSocketSender] Sending failed."

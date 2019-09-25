@@ -8,8 +8,7 @@ module Stackify
     attr_reader :errors, :send_interval, :flood_limit, :queue_max_size
 
     def initialize
-      # @base_api_url = 'https://api.stackify.com'
-      @base_api_url = 'https://qaapi.stackify.com'
+      @base_api_url = 'https://api.stackify.com'
       @errors = []
       @app_name = ''
       @api_key = ''
