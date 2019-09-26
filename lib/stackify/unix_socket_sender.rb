@@ -49,16 +49,17 @@ module Stackify
 
         # Convert data into binary and send it to unix domain socket
         message = Stackify::LogGroup.encode(log_group)
-        client = NetX::HTTPUnix.new('unix:///usr/local/stackify/stackify.sock')
-        req = Net::HTTP::Post.new("/log")
+        client = NetX::HTTPUnix.new('unix://' + Stackify.configuration.unix_socket_path)
+        req = Net::HTTP::Post.new(Stackify.configuration.unix_socket_url)
         req.set_content_type('application/x-protobuf')
         req.body = message
         response = client.request(req)
+        puts "code = #{response.code}"
         if response.code.to_i == 200
-          Stackify.internal_log :info, "[UnixSocketSender]: Successfully send message via unix domain socket."
+          Stackify.internal_log :debug, "[UnixSocketSender]: Successfully send message via unix domain socket."
           return OpenStruct.new({status: 200, message: 'OK'})
         else
-          Stackify.internal_log :info, "[UnixSocketSender] Sending failed."
+          Stackify.internal_log :debug, "[UnixSocketSender] Sending failed."
           return OpenStruct.new({status: 500, message: 'Not OK'})
         end
       rescue => exception

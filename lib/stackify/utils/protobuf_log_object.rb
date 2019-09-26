@@ -15,8 +15,8 @@ module Stackify
         log.level = @level.to_s.upcase!
         log.source_method = Stackify::Backtrace.method_name(@caller_str).to_s
         log.source_line = Stackify::Backtrace.line_number(@caller_str).to_i
-        log.transaction_id = @trans_id
-        log.id = @log_uuid
+        log.transaction_id = @trans_id unless @trans_id.nil?
+        log.id = @log_uuid unless @log_uuid.nil?
         if @ex.try(:to_h)
           ex = @ex.try(:to_h)
           log_error = Stackify::LogGroup::Log::Error.new
@@ -67,7 +67,7 @@ module Stackify
             web_request.post_data_raw = req_details['PostDataRaw'].to_s
             log_error.web_request_detail = web_request
           end
-          if ex['ServerVariables']
+          if !ex['ServerVariables'].empty?
             map_server_vars = Google::Protobuf::Map.new(:string, :string)
             ex['ServerVariables'].each { |key, value| map_server_vars["#{key.to_s}"] = value.to_s }
             log_error.server_variables = map_server_vars

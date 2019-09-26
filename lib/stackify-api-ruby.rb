@@ -29,6 +29,8 @@ module Stackify
   autoload :AddMsgWorker,         'stackify/workers/add_msg_worker'
   autoload :MsgsQueue,            'stackify/msgs_queue'
   autoload :LoggerClient,         'stackify/logger_client'
+  autoload :UnixSocketClient,     'stackify/unix_socket_client'
+  autoload :TransportSelector,    'stackify/transport_selector'
   autoload :LogsSender,           'stackify/logs_sender'
   autoload :UnixSocketSender,     'stackify/unix_socket_sender'
   autoload :LoggerProxy,          'stackify/logger_proxy'
@@ -50,6 +52,7 @@ module Stackify
     def setup
       @workers = []
       yield(configuration) if block_given?
+      configuration.validate_transport_type
       if configuration.is_valid?
         @status = STATUSES[:working]
       else
@@ -69,8 +72,12 @@ module Stackify
       @logger_client ||= Stackify::LoggerClient.new
     end
 
-    def logs_sender
-      @logs_sender ||= Stackify::LogsSender.new
+    def unix_socket_client
+      @unix_socket_client ||= Stackify::UnixSocketClient.new
+    end
+
+    def get_transport
+      @logger_client.get_transport
     end
 
     def send_unix_socket
@@ -114,36 +121,41 @@ module Stackify
 
     def run
       Stackify::Utils.is_api_enabled
+      puts "run = #{Stackify.configuration.transport}"
       if Stackify.configuration.api_enabled
-        # check transport types
-        case Stackify.configuration.transport
-        when Stackify::DEFAULT
-          if Stackify.is_valid?
-            at_exit { make_remained_job }
-             t1 = Thread.new { Stackify.authorize }
-            case Stackify.configuration.mode
-            when MODES[:both]
-              t2 = start_logging
-              t3 = start_metrics
-            when MODES[:logging]
-              t2 = start_logging
-            when MODES[:metrics]
-              t3 = start_metrics
-            end
+        if Stackify.is_valid?
+          # check transport types
+          case Stackify.configuration.transport
+          when Stackify::DEFAULT
+            if Stackify.is_valid?
+              at_exit { make_remained_job }
+              t1 = Thread.new { Stackify.authorize }
+              case Stackify.configuration.mode
+              when MODES[:both]
+                t2 = start_logging
+                t3 = start_metrics
+              when MODES[:logging]
+                t2 = start_logging
+              when MODES[:metrics]
+                t3 = start_metrics
+              end
 
-            t1.join
-            t3.join if t3
+              t1.join
+              t3.join if t3
+            else
+              Stackify.log_internal_error "Stackify is not properly configured! Errors: #{Stackify.configuration.errors}"
+            end
+          when Stackify::UNIX_SOCKET
+            case Stackify.configuration.mode
+            when MODES[:logging]
+              start_logging
+            when MODES[:both]
+              start_logging
+            when MODES[:metrics]
+              Stackify.internal_log :info, '[MetricClient]: Not yet implemented.'
+            end
           else
             Stackify.log_internal_error "Stackify is not properly configured! Errors: #{Stackify.configuration.errors}"
-          end
-        when Stackify::UNIX_SOCKET
-          case Stackify.configuration.mode
-          when MODES[:logging]
-            start_logging
-          when MODES[:both]
-            start_logging
-          when MODES[:metrics]
-            Stackify.internal_log :info, '[MetricClient]: Not yet implemented.'
           end
         end
       end
