@@ -3,35 +3,21 @@ module Stackify
 
     def initialize
       @@errors_governor = Stackify::ErrorsGovernor.new
+      @@transport = Stackify::TransportSelector.new(Stackify.configuration.transport).transport
     end
 
     def log level, msg, call_trace
-      Stackify::Utils.do_only_if_authorized_and_mode_is_on Stackify::MODES[:logging] do
-        if acceptable?(level, msg) && Stackify.working?
-          worker = Stackify::AddMsgWorker.new
-          task = log_message_task level, msg, call_trace
-          worker.async_perform ScheduleDelay.new, task
-        end
-      end
+      task = log_message_task level, msg, call_trace
+      @@transport.log level, msg, call_trace, task
     end
 
     def log_exception level= :error, ex
-      if ex.is_a?(Stackify::StackifiedError)
-        Stackify::Utils.do_only_if_authorized_and_mode_is_on Stackify::MODES[:logging] do
-          if acceptable?(level, ex.message) && Stackify.working?
-            if @@errors_governor.can_send? ex
-              worker = Stackify::AddMsgWorker.new
-              task = log_exception_task level, ex
-              worker.async_perform ScheduleDelay.new, task
-            else
-              Stackify.internal_log :warn,
-              "LoggerClient: logging of exception with message \"#{ex.message}\" is skipped - flood_limit is exceeded"
-            end
-          end
-        end
-      else
-        Stackify.log_internal_error 'LoggerClient: log_exception should get StackifiedError object'
-      end
+      task = log_exception_task level, ex
+      @@transport.log_exception level, ex, task
+    end
+
+    def get_transport
+      @@transport
     end
 
     private
@@ -52,39 +38,11 @@ module Stackify
     end
 
     def log_message_task level, msg, call_trace, trans_id=nil, log_uuid=nil
-      Stackify::ScheduleTask.new ({limit: 1}) do
-        if %w(error fatal).include?(level)
-          ex = if ruby_exception?(msg) && msg.class != Class
-            msg.set_backtrace(call_trace)
-            msg
-          else
-            e = StringException.new(msg)
-            e.set_backtrace(call_trace)
-            e
-          end
-          ex = StackifiedError.new(ex, binding())
-          Stackify.msgs_queue << Stackify::MsgObject.new(level, ex.message, caller[0], trans_id, log_uuid, ex).to_h
-        else
-          Stackify.msgs_queue << Stackify::MsgObject.new(level, msg, caller[0], trans_id, log_uuid).to_h
-        end
-      end
+      @@transport.log_message_task level, msg, call_trace, trans_id, log_uuid
     end
 
     def log_exception_task level, ex, trans_id=nil, log_uuid=nil
-      Stackify::ScheduleTask.new ({limit: 1}) do
-        Stackify.msgs_queue << Stackify::MsgObject.new(level, ex.message, caller[0], trans_id, log_uuid, ex).to_h
-      end
-    end
-
-    def ruby_exception? klass
-      klass = klass.class == Class ? klass : klass.class
-      klasses = [klass]
-      while klass != Object do
-        klasses << klass.superclass
-        klass = klass.superclass
-      end
-      klasses.include?(Exception)
+      @@transport.log_exception_task level, ex, trans_id, log_uuid
     end
   end
-
 end
