@@ -151,8 +151,9 @@ module Stackify
               start_logging
             when MODES[:both]
               start_logging
+              start_metrics
             when MODES[:metrics]
-              Stackify.internal_log :info, '[MetricClient]: Not yet implemented.'
+              start_metrics
             end
           else
             Stackify.log_internal_error "Stackify is not properly configured! Errors: #{Stackify.configuration.errors}"

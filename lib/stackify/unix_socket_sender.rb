@@ -26,27 +26,35 @@ module Stackify
     def send_logs_task attempts = nil, msgs
       properties[:attempts] = attempts if attempts
       Stackify::ScheduleTask.new properties do
-        send_request msgs
+        data = create_log_group msgs
+        send_request data
       end
+    end
+
+    # create_log_group() This function will create a log group protobuf object
+    # @msgs {Object} Protobuf message
+    # return {Object} Return an object
+    def create_log_group msgs
+      details = Stackify::EnvDetails.instance.set_rails_info
+      log_group = Stackify::LogGroup.new
+      msgs.each do |msg|
+        log_group.logs << msg
+      end
+      log_group.environment = details['ConfiguredEnvironmentName']
+      log_group.server_name = details['DeviceName']
+      log_group.application_name = details['AppName']
+      log_group.application_location = details['AppLocation']
+      log_group.logger = 'Rails logger'
+      log_group.platform = 'ruby'
+      log_group
     end
 
     # send_request() This function will send http request via unix domain socket
     # @msgs {Object} Protobuf message
     # return {Object} Return an object {status, message}
-    def send_request msgs
+    def send_request log_group
       begin
-        details = Stackify::EnvDetails.instance.set_rails_info
-        log_group = Stackify::LogGroup.new
-        msgs.each do |msg|
-          log_group.logs << msg
-        end
-        log_group.environment = details['ConfiguredEnvironmentName']
-        log_group.server_name = details['DeviceName']
-        log_group.application_name = details['AppName']
-        log_group.application_location = details['AppLocation']
-        log_group.logger = 'Rails logger'
-        log_group.platform = 'ruby'
-
+        # log_group = create_log_group msgs
         # Convert data into binary and send it to unix domain socket
         message = Stackify::LogGroup.encode(log_group)
         client = NetX::HTTPUnix.new('unix://' + Stackify.configuration.unix_socket_path)

@@ -19,7 +19,6 @@ module Stackify
         if acceptable?(level, ex.message) && Stackify.working?
           if @@errors_governor.can_send? ex
             worker = Stackify::AddMsgWorker.new
-            # task = log_exception_task level, ex
             worker.async_perform ScheduleDelay.new, task
           else
             Stackify.internal_log :warn,
@@ -44,14 +43,6 @@ module Stackify
     end
 
     def log_message_task level, msg, call_trace, trans_id=nil, log_uuid=nil
-      File.open("./MYLOG-log_message_task.txt", 'a') { |file|
-        file.puts ' '
-        file.puts 'socket_client log_message_task()'
-        file.puts "level = #{level}"
-        file.puts "msg = #{msg}"
-        file.puts "trans_id = #{trans_id}"
-        file.puts "log_uuid = #{log_uuid}"
-      }
       Stackify::ScheduleTask.new ({limit: 1}) do
         if %w(error fatal).include?(level)
           ex = if ruby_exception?(msg) && msg.class != Class
