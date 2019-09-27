@@ -33,4 +33,13 @@ module Stackify::Utils
     found = exclude.select{|e| e =~ /#{cmd}/i}
     Stackify.configuration.api_enabled = false if found.count > 0
   end
+
+  def self.get_app_settings
+    @env = {
+      'env' => Stackify.configuration.env,
+      'app_name' => Stackify.configuration.app_name,
+      'server_name' => Socket.gethostname,
+      'app_location' => Stackify.configuration.app_location || Dir.pwd
+    }
+  end
 end

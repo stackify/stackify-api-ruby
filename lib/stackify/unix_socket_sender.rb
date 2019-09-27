@@ -35,16 +35,17 @@ module Stackify
     # @msgs {Object} Protobuf message
     # return {Object} Return an object
     def create_log_group msgs
-      details = Stackify::EnvDetails.instance.set_rails_info
+      # @details {Object} it will return the properties based in Stackify.setup() configuration
+      details = Stackify::Utils.get_app_settings
       log_group = Stackify::LogGroup.new
       msgs.each do |msg|
         log_group.logs << msg
       end
-      log_group.environment = details['ConfiguredEnvironmentName']
-      log_group.server_name = details['DeviceName']
-      log_group.application_name = details['AppName']
-      log_group.application_location = details['AppLocation']
-      log_group.logger = 'Rails logger'
+      log_group.environment = details['env']
+      log_group.server_name = details['server_name']
+      log_group.application_name = details['app_name']
+      log_group.application_location = details['app_location']
+      log_group.logger = 'Ruby logger'
       log_group.platform = 'ruby'
       log_group
     end
@@ -54,7 +55,6 @@ module Stackify
     # return {Object} Return an object {status, message}
     def send_request log_group
       begin
-        # log_group = create_log_group msgs
         # Convert data into binary and send it to unix domain socket
         message = Stackify::LogGroup.encode(log_group)
         client = NetX::HTTPUnix.new('unix://' + Stackify.configuration.unix_socket_path)
@@ -62,16 +62,17 @@ module Stackify
         req.set_content_type('application/x-protobuf')
         req.body = message
         response = client.request(req)
-        puts "code = #{response.code}"
+        Stackify.internal_log :debug, "[UnixSocketSender] status_code = #{response.code}"
         if response.code.to_i == 200
           Stackify.internal_log :debug, "[UnixSocketSender]: Successfully send message via unix domain socket."
-          return OpenStruct.new({status: 200, message: 'OK'})
+          return OpenStruct.new({status: 200, msg: 'OK'})
         else
           Stackify.internal_log :debug, "[UnixSocketSender] Sending failed."
-          return OpenStruct.new({status: 500, message: 'Not OK'})
+          return OpenStruct.new({status: 500, msg: 'Not OK'})
         end
       rescue => exception
         Stackify.log_internal_error "[UnixSocketSender] send_logs() Error: #{exception}"
+        return OpenStruct.new({status: 500, msg: exception})
       end
     end
   end

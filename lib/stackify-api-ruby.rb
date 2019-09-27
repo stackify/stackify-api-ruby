@@ -121,7 +121,7 @@ module Stackify
 
     def run
       Stackify::Utils.is_api_enabled
-      puts "run = #{Stackify.configuration.transport}"
+      Stackify.internal_log :debug, "Stackify.run = #{Stackify.configuration.transport}"
       if Stackify.configuration.api_enabled
         if Stackify.is_valid?
           # check transport types
