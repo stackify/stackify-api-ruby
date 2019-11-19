@@ -21,10 +21,10 @@ module Stackify
         message = Stackify::LogGroup.encode(log_group)
         conn = Faraday.new(proxy: Stackify.configuration.proxy)
         @response = conn.post do |req|
-                      req.url URI(Stackify.configuration.http_endpoint + Stackify.configuration.agent_log_url)
-                      req.headers = HEADERS
-                      req.body = message
-                    end
+          req.url URI(Stackify.configuration.http_endpoint + Stackify.configuration.agent_log_url)
+          req.headers = HEADERS
+          req.body = message
+        end
         if @response.try(:status) == 200
           Stackify.internal_log :debug, "[AgentHTTPSender]: Successfully send message via unix domain socket."
           return OpenStruct.new({status: 200, msg: 'OK'})
