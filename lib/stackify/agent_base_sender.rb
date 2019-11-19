@@ -1,6 +1,3 @@
-require 'net_http_unix'
-require 'ostruct'
-
 #
 # This class will handle the sending of protobuf message to agent
 #
