@@ -1,10 +1,15 @@
 module Stackify
-  class UnixSocketClient
+  class AgentClient
 
     def initialize
-      Stackify.internal_log :info, '[UnixSocketClient]: initialize()'
+      Stackify.internal_log :info, '[AgentClient]: initialize()'
       @@errors_governor = Stackify::ErrorsGovernor.new
-      @@sender = Stackify::UnixSocketSender.new
+      case Stackify.configuration.transport
+        when Stackify::UNIX_SOCKET
+          @@sender = Stackify::UnixSocketSender.new
+        when Stackify::AGENT_HTTP
+          @@sender = Stackify::AgentHTTPSender.new
+        end
     end
 
     def log level, msg, call_trace, task
@@ -22,11 +27,11 @@ module Stackify
             worker.async_perform ScheduleDelay.new, task
           else
             Stackify.internal_log :warn,
-            "UnixSocketClient: logging of exception with message \"#{ex.message}\" is skipped - flood_limit is exceeded"
+            "AgentClient: logging of exception with message \"#{ex.message}\" is skipped - flood_limit is exceeded"
           end
         end
       else
-        Stackify.log_internal_error 'UnixSocketClient: log_exception should get StackifiedError object'
+        Stackify.log_internal_error 'AgentClient: log_exception should get StackifiedError object'
       end
     end
 
