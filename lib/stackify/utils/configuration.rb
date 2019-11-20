@@ -53,7 +53,7 @@ module Stackify
     private
 
     def validate_config_types
-      validate_api_key &&d
+      validate_api_key &&
       validate_log_level &&
       validate_mode_type
     end
