@@ -3,6 +3,8 @@ module Stackify
 
     def initialize name = 'LogsSender worker'
       super
+      @name = name
+      @name += " ##{self.id}"
       @type = :logs_send
     end
 

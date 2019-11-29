@@ -2,14 +2,19 @@ require 'stackify/version'
 require 'stackify/utils/methods'
 require 'core_ext/core_ext' unless defined? Rails
 
+require 'google/protobuf'
+require 'proto/stackify-agent.rb'
+
 module Stackify
 
   INTERNAL_LOG_PREFIX = '[Stackify]'.freeze
   STATUSES = { working: 'working', terminating: 'terminating', terminated: 'terminated'}
   MODES = { logging: :logging, metrics: :metrics, both: :both }
+  TRANSPORT = [DEFAULT = 'default', UNIX_SOCKET = 'agent_socket']
 
   autoload :Backtrace,            'stackify/utils/backtrace'
   autoload :MsgObject,            'stackify/utils/msg_object'
+  autoload :ProtobufLogObject,    'stackify/utils/protobuf_log_object'
   autoload :Configuration,        'stackify/utils/configuration'
   autoload :HttpClient,           'stackify/http_client'
   autoload :Authorizable,         'stackify/authorization/authorizable'
@@ -24,7 +29,10 @@ module Stackify
   autoload :AddMsgWorker,         'stackify/workers/add_msg_worker'
   autoload :MsgsQueue,            'stackify/msgs_queue'
   autoload :LoggerClient,         'stackify/logger_client'
+  autoload :UnixSocketClient,     'stackify/unix_socket_client'
+  autoload :TransportSelector,    'stackify/transport_selector'
   autoload :LogsSender,           'stackify/logs_sender'
+  autoload :UnixSocketSender,     'stackify/unix_socket_sender'
   autoload :LoggerProxy,          'stackify/logger_proxy'
   autoload :StackifiedError,      'stackify/error'
   autoload :StringException,      'stackify/error'
@@ -44,6 +52,7 @@ module Stackify
     def setup
       @workers = []
       yield(configuration) if block_given?
+      configuration.validate_transport_type
       if configuration.is_valid?
         @status = STATUSES[:working]
       else
@@ -53,7 +62,6 @@ module Stackify
         end
         raise msg
       end
-
     end
 
     def msgs_queue
@@ -64,8 +72,16 @@ module Stackify
       @logger_client ||= Stackify::LoggerClient.new
     end
 
-    def logs_sender
-      @logs_sender ||= Stackify::LogsSender.new
+    def unix_socket_client
+      @unix_socket_client ||= Stackify::UnixSocketClient.new
+    end
+
+    def get_transport
+      @logger_client.get_transport
+    end
+
+    def send_unix_socket
+      @unix_socket ||= Stackify::UnixSocketSender.new
     end
 
     def logger
@@ -105,24 +121,43 @@ module Stackify
 
     def run
       Stackify::Utils.is_api_enabled
+      Stackify.internal_log :debug, "Stackify.run = #{Stackify.configuration.transport}"
       if Stackify.configuration.api_enabled
         if Stackify.is_valid?
-          at_exit { make_remained_job }
-           t1 = Thread.new { Stackify.authorize }
-          case Stackify.configuration.mode
-          when MODES[:both]
-            t2 = start_logging
-            t3 = start_metrics
-          when MODES[:logging]
-            t2 = start_logging
-          when MODES[:metrics]
-            t3 = start_metrics
-          end
+          # check transport types
+          case Stackify.configuration.transport
+          when Stackify::DEFAULT
+            if Stackify.is_valid?
+              at_exit { make_remained_job }
+              t1 = Thread.new { Stackify.authorize }
+              case Stackify.configuration.mode
+              when MODES[:both]
+                t2 = start_logging
+                t3 = start_metrics
+              when MODES[:logging]
+                t2 = start_logging
+              when MODES[:metrics]
+                t3 = start_metrics
+              end
 
-          t1.join
-          t3.join if t3
-        else
-          Stackify.log_internal_error "Stackify is not properly configured! Errors: #{Stackify.configuration.errors}"
+              t1.join
+              t3.join if t3
+            else
+              Stackify.log_internal_error "Stackify is not properly configured! Errors: #{Stackify.configuration.errors}"
+            end
+          when Stackify::UNIX_SOCKET
+            case Stackify.configuration.mode
+            when MODES[:logging]
+              start_logging
+            when MODES[:both]
+              start_logging
+              start_metrics
+            when MODES[:metrics]
+              start_metrics
+            end
+          else
+            Stackify.log_internal_error "Stackify is not properly configured! Errors: #{Stackify.configuration.errors}"
+          end
         end
       end
     end

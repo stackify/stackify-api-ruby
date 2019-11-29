@@ -34,7 +34,7 @@ module Stackify
         Stackify.internal_log :info, '[MsgsQueue] All remained logs are going to be sent'
         Stackify.shutdown_all
         if self.length > 0
-          Stackify.logs_sender.send_logs(pop_all)
+          Stackify.get_transport.send_logs(pop_all)
           Stackify.status = Stackify::STATUSES[:terminated]
         end
       end
@@ -47,7 +47,12 @@ module Stackify
         Stackify.internal_log :debug, "[MsgsQueue] add_msg() Newly created worker <#{@worker.name}>"
       end
       self.synchronize do
-        Stackify::Utils.do_only_if_authorized_and_mode_is_on Stackify::MODES[:logging] do
+        case Stackify.configuration.transport
+        when Stackify::DEFAULT
+          Stackify::Utils.do_only_if_authorized_and_mode_is_on Stackify::MODES[:logging] do
+            old_push(msg)
+          end
+        when Stackify::UNIX_SOCKET
           old_push(msg)
         end
       end
@@ -109,13 +114,13 @@ module Stackify
           if length > 0
             msg = pop
             chunk << msg
-            chunk_weight += (msg['Ex'].nil? ? LOG_SIZE : ERROR_SIZE)
-            break if msg['EpochMs'] > started_at || CHUNK_MIN_WEIGHT > 50
+            chunk_weight += Stackify.get_transport.has_error(msg) ? ERROR_SIZE : LOG_SIZE
+            break if Stackify.get_transport.get_epoch(msg) > started_at || CHUNK_MIN_WEIGHT > 50
           else
             break
           end
         end
-        Stackify.logs_sender.send_logs(chunk) if chunk.length > 0
+        Stackify.get_transport.send_logs(chunk) if chunk.length > 0
         chunk_weight
       end
     end
