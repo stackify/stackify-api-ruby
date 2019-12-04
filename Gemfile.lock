@@ -3,13 +3,17 @@ PATH
   specs:
     stackify-api-ruby (1.1.0)
       faraday (~> 0.8)
+      google-protobuf (~> 3.0)
+      net_http_unix (~> 0.2)
 
 GEM
   remote: https://rubygems.org/
   specs:
-    faraday (0.15.4)
+    faraday (0.17.1)
       multipart-post (>= 1.2, < 3)
-    multipart-post (2.0.0)
+    google-protobuf (3.7.1)
+    multipart-post (2.1.1)
+    net_http_unix (0.2.2)
     rake (0.9.6)
 
 PLATFORMS
