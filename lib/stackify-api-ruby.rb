@@ -10,7 +10,7 @@ module Stackify
   INTERNAL_LOG_PREFIX = '[Stackify]'.freeze
   STATUSES = { working: 'working', terminating: 'terminating', terminated: 'terminated'}
   MODES = { logging: :logging, metrics: :metrics, both: :both }
-  TRANSPORT = [DEFAULT = 'default', UNIX_SOCKET = 'agent_socket']
+  TRANSPORT = [DEFAULT = 'default', UNIX_SOCKET = 'agent_socket', AGENT_HTTP = 'agent_http']
 
   autoload :Backtrace,            'stackify/utils/backtrace'
   autoload :MsgObject,            'stackify/utils/msg_object'
@@ -29,10 +29,12 @@ module Stackify
   autoload :AddMsgWorker,         'stackify/workers/add_msg_worker'
   autoload :MsgsQueue,            'stackify/msgs_queue'
   autoload :LoggerClient,         'stackify/logger_client'
-  autoload :UnixSocketClient,     'stackify/unix_socket_client'
+  autoload :AgentClient,          'stackify/agent_client'
   autoload :TransportSelector,    'stackify/transport_selector'
   autoload :LogsSender,           'stackify/logs_sender'
+  autoload :AgentBaseSender,      'stackify/agent_base_sender'
   autoload :UnixSocketSender,     'stackify/unix_socket_sender'
+  autoload :AgentHTTPSender,      'stackify/agent_http_sender'
   autoload :LoggerProxy,          'stackify/logger_proxy'
   autoload :StackifiedError,      'stackify/error'
   autoload :StringException,      'stackify/error'
@@ -72,8 +74,8 @@ module Stackify
       @logger_client ||= Stackify::LoggerClient.new
     end
 
-    def unix_socket_client
-      @unix_socket_client ||= Stackify::UnixSocketClient.new
+    def agent_client
+      @agent_client ||= Stackify::AgentClient.new
     end
 
     def get_transport
@@ -145,7 +147,7 @@ module Stackify
             else
               Stackify.log_internal_error "Stackify is not properly configured! Errors: #{Stackify.configuration.errors}"
             end
-          when Stackify::UNIX_SOCKET
+          when Stackify::UNIX_SOCKET, Stackify::AGENT_HTTP
             case Stackify.configuration.mode
             when MODES[:logging]
               start_logging

@@ -9,8 +9,8 @@ module Stackify
         Stackify::Utils.do_only_if_authorized_and_mode_is_on Stackify::MODES[:logging] do
           @transport = Stackify::LogsSender.new
         end
-      when Stackify::UNIX_SOCKET
-        @transport = Stackify::UnixSocketClient.new
+      when Stackify::UNIX_SOCKET, Stackify::AGENT_HTTP
+        @transport = Stackify::AgentClient.new
       end
     end
   end
