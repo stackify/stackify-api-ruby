@@ -52,7 +52,7 @@ module Stackify
           Stackify::Utils.do_only_if_authorized_and_mode_is_on Stackify::MODES[:logging] do
             old_push(msg)
           end
-        when Stackify::UNIX_SOCKET
+        when Stackify::UNIX_SOCKET, Stackify::AGENT_HTTP
           old_push(msg)
         end
       end
