@@ -4,14 +4,17 @@ module Stackify
     def initialize
       @@errors_governor = Stackify::ErrorsGovernor.new
       @@transport = Stackify::TransportSelector.new(Stackify.configuration.transport).transport
+      return if @@transport.nil?
     end
 
     def log level, msg, call_trace
+      return if @@transport.nil?
       task = log_message_task level, msg, call_trace
       @@transport.log level, msg, call_trace, task
     end
 
     def log_exception level= :error, ex
+      return if @@transport.nil?
       task = log_exception_task level, ex
       @@transport.log_exception level, ex, task
     end
@@ -38,10 +41,12 @@ module Stackify
     end
 
     def log_message_task level, msg, call_trace, trans_id=nil, log_uuid=nil
+      return if @@transport.nil?
       @@transport.log_message_task level, msg, call_trace, trans_id, log_uuid
     end
 
     def log_exception_task level, ex, trans_id=nil, log_uuid=nil
+      return if @@transport.nil?
       @@transport.log_exception_task level, ex, trans_id, log_uuid
     end
   end

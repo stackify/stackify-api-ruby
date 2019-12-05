@@ -38,10 +38,10 @@ module Stackify
       msgs.each do |msg|
         log_group.logs << msg
       end
-      log_group.environment = details['env']
-      log_group.server_name = details['server_name']
-      log_group.application_name = details['app_name']
-      log_group.application_location = details['app_location']
+      log_group.environment = details['env'].to_s
+      log_group.server_name = details['server_name'].to_s
+      log_group.application_name = details['app_name'].to_s
+      log_group.application_location = details['app_location'].to_s
       log_group.logger = 'Ruby logger'
       log_group.platform = 'ruby'
       log_group
