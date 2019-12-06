@@ -31,7 +31,11 @@ module Stackify
     end
 
     def error_type
-      @exception.class
+      if @exception.class.to_s == 'StringException'
+        @exception.message.split(" ")[0].to_s
+      else
+        @exception.class
+      end
     end
 
     def to_h
