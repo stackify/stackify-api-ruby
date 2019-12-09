@@ -19,7 +19,7 @@ module Stackify
       begin
         # Convert data into binary and send it to agent
         message = Stackify::LogGroup.encode(log_group)
-        conn = Faraday.new(proxy: Stackify.configuration.proxy)
+        conn = Faraday.new(proxy: Stackify.configuration.proxy, ssl: { verify: false })
         @response = conn.post do |req|
           req.url URI(Stackify.configuration.http_endpoint + Stackify.configuration.agent_log_url)
           req.headers = HEADERS
