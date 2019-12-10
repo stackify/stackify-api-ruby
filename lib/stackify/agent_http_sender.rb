@@ -26,7 +26,7 @@ module Stackify
           req.body = message
         end
         if @response.try(:status) == 200
-          Stackify.internal_log :debug, "[AgentHTTPSender]: Successfully send message via unix domain socket."
+          Stackify.internal_log :debug, "[AgentHTTPSender]: Successfully send message via http request."
           return OpenStruct.new({status: 200, msg: 'OK'})
         else
           Stackify.internal_log :debug, "[AgentHTTPSender] Sending failed."
