@@ -10,7 +10,7 @@ module Stackify
   INTERNAL_LOG_PREFIX = '[Stackify]'.freeze
   STATUSES = { working: 'working', terminating: 'terminating', terminated: 'terminated'}
   MODES = { logging: :logging, metrics: :metrics, both: :both }
-  TRANSPORT = [DEFAULT = 'log', UNIX_SOCKET = 'agent_socket', AGENT_HTTP = 'agent_http']
+  TRANSPORT = [DEFAULT = 'default', UNIX_SOCKET = 'agent_socket', AGENT_HTTP = 'agent_http']
 
   autoload :Backtrace,            'stackify/utils/backtrace'
   autoload :MsgObject,            'stackify/utils/msg_object'
