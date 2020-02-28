@@ -2,9 +2,14 @@ module Stackify
   class LoggerClient
 
     def initialize
-      @@errors_governor = Stackify::ErrorsGovernor.new
-      @@transport = Stackify::TransportSelector.new(Stackify.configuration.transport).transport
-      return if @@transport.nil?
+      begin
+        @@errors_governor = Stackify::ErrorsGovernor.new
+        @@transport = Stackify::TransportSelector.new(Stackify.configuration.transport).transport
+        Stackify.internal_log :info, "[LoggerClient] initialize: #{@@transport}"
+        return if @@transport.nil?
+      rescue => ex
+        Stackify.log_internal_error "[LoggerClient] initialize exception = #{ex.inspect}"
+      end
     end
 
     def log level, msg, call_trace
@@ -20,6 +25,7 @@ module Stackify
     end
 
     def get_transport
+      return if @@transport.nil?
       @@transport
     end
 

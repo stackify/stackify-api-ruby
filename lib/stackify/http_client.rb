@@ -25,6 +25,7 @@ module Stackify
                       req.headers = headers
                       req.body = body
                     end
+      return @response
       rescue => ex
         @errors << ex
         Stackify.log_internal_error('HttpClient: ' + ex.message+ ' Backtrace: '+ Stackify::Backtrace.backtrace_in_line(ex.backtrace))
