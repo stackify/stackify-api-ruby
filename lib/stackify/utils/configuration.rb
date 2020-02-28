@@ -12,7 +12,7 @@ module Stackify
       @errors = []
       @app_name = ''
       @api_key = ''
-      @transport = get_env 'STACKIFY_TRANSPORT', 'default'
+      @transport = get_env 'STACKIFY_TRANSPORT', 'log'
       @env = :production
       @flood_limit = 100
       @queue_max_size = 10000
@@ -46,7 +46,7 @@ module Stackify
     end
 
     def validate_transport_type
-      return true if ['agent_socket', 'agent_http', 'default'].include? @transport
+      return true if ['agent_socket', 'agent_http', 'log'].include? @transport
       @errors << 'Transport should be one of these values: [agent_socket, agent_http, default]. Should be a String.'
     end
 
