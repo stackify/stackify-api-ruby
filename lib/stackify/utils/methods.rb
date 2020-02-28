@@ -14,16 +14,20 @@ module Stackify::Utils
   end
 
   def self.do_only_if_authorized_and_mode_is_on mode, &block
-    if Stackify.configuration.api_enabled
-      if Stackify.authorized?
-        if is_mode_on? mode
-          yield
+    begin
+      if Stackify.configuration.api_enabled
+        if Stackify.authorized?
+          if is_mode_on? mode
+            yield
+          else
+            Stackify.internal_log :warn, "[Stackify::Utils] - #{caller[0]}: Skipped because mode - #{mode.to_s} is disabled at configuration"
+          end
         else
-          Stackify.internal_log :warn, "#{caller[0]}: Skipped because mode - #{mode.to_s} is disabled at configuration"
+          Stackify.internal_log :warn, "[Stackify::Utils] - #{caller[0]}: Skipped due to authorization failure"
         end
-      else
-        Stackify.internal_log :warn, "#{caller[0]}: Skipped due to authorization failure"
       end
+    rescue => ex
+      Stackify.internal_log :warn, "[Stackify::Utils] do_only_if_authorized_and_mode_is_on ex: #{ex.inspect}"
     end
   end
 

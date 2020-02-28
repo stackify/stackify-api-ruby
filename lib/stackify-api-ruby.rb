@@ -123,7 +123,7 @@ module Stackify
 
     def run
       Stackify::Utils.is_api_enabled
-      Stackify.internal_log :debug, "Stackify.run = #{Stackify.configuration.transport}"
+      Stackify.internal_log :info, "Stackify.run() transportType = #{Stackify.configuration.transport} | API version: #{Stackify::VERSION}"
       if Stackify.configuration.api_enabled
         if Stackify.is_valid?
           # check transport types
@@ -141,7 +141,6 @@ module Stackify
               when MODES[:metrics]
                 t3 = start_metrics
               end
-
               t1.join
               t3.join if t3
             else
