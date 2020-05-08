@@ -28,6 +28,25 @@ module Stackify
       end
     end
 
+    # create_log_group() This function will create a log group object
+    # @msgs {Object} log group message
+    # return {Object} Return an object
+    def create_log_group msgs
+      # @details {Object} it will return the properties based in Stackify.setup() configuration
+      details = Stackify::Utils.get_app_settings
+      log_group = Stackify::LogGroup.new
+      msgs.each do |msg|
+        log_group.logs << msg
+      end
+      log_group.environment = details['env'].to_s
+      log_group.server_name = details['server_name'].to_s
+      log_group.application_name = details['app_name'].to_s
+      log_group.application_location = details['app_location'].to_s
+      log_group.logger = 'Ruby logger'
+      log_group.platform = 'ruby'
+      log_group
+    end
+
     def gather_and_pack_data msgs
       details = Stackify::EnvDetails.instance.auth_info
       {
