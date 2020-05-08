@@ -2,8 +2,6 @@ require 'stackify/version'
 require 'stackify/utils/methods'
 require 'core_ext/core_ext' unless defined? Rails
 
-require 'google/protobuf'
-require 'proto/stackify-agent.rb'
 
 module Stackify
 
@@ -14,7 +12,6 @@ module Stackify
 
   autoload :Backtrace,            'stackify/utils/backtrace'
   autoload :MsgObject,            'stackify/utils/msg_object'
-  autoload :ProtobufLogObject,    'stackify/utils/protobuf_log_object'
   autoload :Configuration,        'stackify/utils/configuration'
   autoload :HttpClient,           'stackify/http_client'
   autoload :Authorizable,         'stackify/authorization/authorizable'

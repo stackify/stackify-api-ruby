@@ -2,22 +2,20 @@ require 'net_http_unix'
 require 'ostruct'
 
 #
-# This class will handle the sending of protobuf message to unix domain socket
+# This class will handle the sending of log messages to unix domain socket
 #
 module Stackify
   class UnixSocketSender < AgentBaseSender
 
     # send_request() This function will send http request via unix domain socket
-    # @msgs {Object} Protobuf message
+    # @msgs {Object} log group message
     # return {Object} Return an object {status, message}
     def send_request log_group
       begin
-        # Convert data into binary and send it to unix domain socket
-        message = Stackify::LogGroup.encode(log_group)
         client = NetX::HTTPUnix.new('unix://' + Stackify.configuration.unix_socket_path)
         req = Net::HTTP::Post.new(Stackify.configuration.agent_log_url)
-        req.set_content_type('application/x-protobuf')
-        req.body = message
+        req.set_content_type('application/json')
+        req.body = log_group
         response = client.request(req)
         Stackify.internal_log :debug, "[UnixSocketSender] status_code = #{response.code}"
         if response.code.to_i == 200
