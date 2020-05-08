@@ -36,11 +36,11 @@ module Stackify
     end
 
     def has_error msg
-      !msg.error.nil?
+      !msg['Ex'].nil?
     end
 
     def get_epoch msg
-      msg.date_millis
+      msg['EpochMs']
     end
 
     def send_logs msgs, attempts = 3
