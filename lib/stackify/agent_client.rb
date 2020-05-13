@@ -36,11 +36,11 @@ module Stackify
     end
 
     def has_error msg
-      !msg.error.nil?
+      !msg['Ex'].nil?
     end
 
     def get_epoch msg
-      msg.date_millis
+      msg['EpochMs']
     end
 
     def send_logs msgs, attempts = 3
@@ -59,16 +59,16 @@ module Stackify
             e
           end
           ex = StackifiedError.new(ex, binding())
-          Stackify.msgs_queue << Stackify::ProtobufLogObject.new(level, ex.message, caller[0], trans_id, log_uuid, ex).to_obj
+          Stackify.msgs_queue << Stackify::MsgObject.new(level, ex.message, caller[0], trans_id, log_uuid, ex).to_h
         else
-          Stackify.msgs_queue << Stackify::ProtobufLogObject.new(level, msg, caller[0], trans_id, log_uuid).to_obj
+          Stackify.msgs_queue << Stackify::MsgObject.new(level, msg, caller[0], trans_id, log_uuid).to_h
         end
       end
     end
 
     def log_exception_task level, ex, trans_id=nil, log_uuid=nil
       Stackify::ScheduleTask.new ({limit: 1}) do
-        Stackify.msgs_queue << Stackify::ProtobufLogObject.new(level, ex.message, caller[0], trans_id, log_uuid, ex).to_obj
+        Stackify.msgs_queue << Stackify::MsgObject.new(level, ex.message, caller[0], trans_id, log_uuid, ex).to_h
       end
     end
 

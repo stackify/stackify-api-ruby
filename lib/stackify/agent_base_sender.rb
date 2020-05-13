@@ -1,5 +1,5 @@
 #
-# This class will handle the sending of protobuf message to agent
+# This class will handle the sending of log group message to agent
 #
 module Stackify
   class AgentBaseSender < Worker
@@ -23,28 +23,27 @@ module Stackify
     def send_logs_task attempts = nil, msgs
       properties[:attempts] = attempts if attempts
       Stackify::ScheduleTask.new properties do
-        data = create_log_group msgs
+        data = gather_and_pack_data(msgs).to_json
         send_request data
       end
     end
 
-    # create_log_group() This function will create a log group protobuf object
-    # @msgs {Object} Protobuf message
-    # return {Object} Return an object
-    def create_log_group msgs
-      # @details {Object} it will return the properties based in Stackify.setup() configuration
-      details = Stackify::Utils.get_app_settings
-      log_group = Stackify::LogGroup.new
-      msgs.each do |msg|
-        log_group.logs << msg
-      end
-      log_group.environment = details['env'].to_s
-      log_group.server_name = details['server_name'].to_s
-      log_group.application_name = details['app_name'].to_s
-      log_group.application_location = details['app_location'].to_s
-      log_group.logger = 'Ruby logger'
-      log_group.platform = 'ruby'
-      log_group
+    def gather_and_pack_data msgs
+      details = Stackify::EnvDetails.instance.auth_info
+      {
+        'CDID' => details['DeviceID'],
+        'CDAppID' => details['DeviceAppID'],
+        'Logger' => 'Rails logger',
+        'AppName' => details['AppName'],
+        'AppNameID' => details['AppNameID'],
+        'Env' => details['Env'],
+        'EnvID' => details['EnvID'],
+        'AppEnvID' => details['AppEnvID'],
+        'ServerName' => details['DeviceName'],
+        'Msgs' => msgs,
+        'AppLoc' => details['AppLocation'],
+        'Platform' => 'Ruby'
+      }
     end
 
     def send_request log_group

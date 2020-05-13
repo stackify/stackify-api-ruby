@@ -3,27 +3,25 @@ require 'faraday'
 require 'ostruct'
 
 #
-# This class will handle the sending of protobuf message to agent using http request
+# This class will handle the sending of log messages to agent using http request
 #
 module Stackify
   class AgentHTTPSender < AgentBaseSender
 
     HEADERS = {
-      'Content-Type' => 'application/x-protobuf'
+      'Content-Type' => 'application/json'
     }
 
     # send_request() This function will post an http request
-    # @msgs {Object} Protobuf message
+    # @msgs {Object} log group message
     # return {Object} Return an object {status, message}
     def send_request log_group
       begin
-        # Convert data into binary and send it to agent
-        message = Stackify::LogGroup.encode(log_group)
         conn = Faraday.new(proxy: Stackify.configuration.proxy, ssl: { verify: false })
         @response = conn.post do |req|
           req.url URI(Stackify.configuration.http_endpoint + Stackify.configuration.agent_log_url)
           req.headers = HEADERS
-          req.body = message
+          req.body = log_group
         end
         if @response.try(:status) == 200
           Stackify.internal_log :debug, "[AgentHTTPSender]: Successfully send message via http request."
