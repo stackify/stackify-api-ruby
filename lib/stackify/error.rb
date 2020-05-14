@@ -40,7 +40,7 @@ module Stackify
 
     def to_h
       env = Stackify::EnvDetails.instance
-      {
+      data = {
         'OccurredEpochMillis' => Time.now.to_f*1000,
         'Error' => {
           'InnerError' => @exception.try(:cause),
@@ -52,11 +52,20 @@ module Stackify
           'SourceMethod' => source_method,
         },
         'EnvironmentDetail' => env.auth_info,
-        'WebRequestDetail' => env.request_details.try{ |d| d.fetch('webrequest_details', '') },
-        'ServerVariables' => env.request_details.try{ |d| d.fetch('server_variables', '') },
         'CustomerName' => 'Customer',
         'UserName' => @context.fetch('user', '')
       }
+      web_request_details = env.request_details.try{ |d| d.fetch('webrequest_details', '') }
+      if web_request_details.nil?
+        data['WebRequestDetail'] = web_request_details
+      end
+
+      server_variables = env.request_details.try{ |d| d.fetch('server_variables', '') }
+      if server_variables.nil?
+        data['ServerVariables'] = server_variables
+      end
+
+      data
     end
 
   end
