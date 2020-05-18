@@ -6,14 +6,6 @@ module Stackify
 
     # send_logs() Function to put the msg in the Worker
     def send_logs msgs, attempts = 3
-      case Stackify.configuration.transport
-      when Stackify::DEFAULT
-        name = 'LogsSender worker'
-      when Stackify::UNIX_SOCKET
-        name = 'UnixSocketSender worker'
-      when Stackify::AGENT_HTTP
-        name = 'AgentHTTPSender worker'
-      end
       worker = Stackify::LogsSenderWorker.new('UnixSocketSender worker')
       task = send_logs_task attempts, msgs
       worker.async_perform ScheduleDelay.new, task
