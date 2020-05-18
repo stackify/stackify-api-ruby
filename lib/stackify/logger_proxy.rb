@@ -3,7 +3,7 @@ module Stackify
 
     def initialize logger
       @logger = logger
-      @logger.level = Logger.const_get(Stackify.configuration.log_level.to_s.upcase)
+      @logger.level = Logger::DEBUG  # capture all rails debug messages
       %w(debug info warn error fatal unknown).each do |level|
         stackify_logger = if level == 'debug'
           -> (msg, caller) { Stackify.logger_client.log(level.downcase, msg, caller) unless msg.to_s.empty? }

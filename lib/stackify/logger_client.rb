@@ -13,6 +13,7 @@ module Stackify
     end
 
     def log level, msg, call_trace
+      puts msg  # display logs in the console
       return if @@transport.nil?
       task = log_message_task level, msg, call_trace
       @@transport.log level, msg, call_trace, task

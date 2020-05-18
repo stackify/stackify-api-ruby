@@ -120,7 +120,7 @@ module Stackify
 
     def run
       Stackify::Utils.is_api_enabled
-      Stackify.internal_log :info, "Stackify.run() transportType = #{Stackify.configuration.transport} | API version: #{Stackify::VERSION}"
+      Stackify.internal_log :info, "Stackify.run() transportType: #{Stackify.configuration.transport} | API version: #{Stackify::VERSION} | Ruby version: #{RUBY_VERSION}"
       if Stackify.configuration.api_enabled
         if Stackify.is_valid?
           # check transport types

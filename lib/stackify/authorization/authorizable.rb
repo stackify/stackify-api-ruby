@@ -11,7 +11,9 @@ module Stackify::Authorizable
     @@auth_client = nil
 
     def authorize attempts=3
-      Stackify::EnvDetails.instance.set_rails_info
+      if Gem::Version.new(RUBY_VERSION) <= Gem::Version.new('2.0')
+        Stackify::EnvDetails.instance.set_rails_info
+      end
       @@auth_lock.synchronize do
         return unless @@auth_client.nil?
         @@auth_client = Stackify::Authorizable::AuthorizationClient.new
