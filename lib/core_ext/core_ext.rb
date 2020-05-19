@@ -1,3 +1,8 @@
 require 'json'
 require 'core_ext/object'
-require 'core_ext/fixnum' unless defined? ActiveSupport
+
+begin
+  require 'active_support/time'
+rescue LoadError => e
+  require 'core_ext/fixnum'
+end
