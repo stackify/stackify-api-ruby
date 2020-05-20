@@ -1,6 +1,6 @@
 module Stackify::Metrics
   class MetricsClient
-
+    TEN_MINUTES = 600
     attr_reader :metrics_queue
 
     def initialize
@@ -57,7 +57,7 @@ module Stackify::Metrics
 
     def start_upload_metrics
       current_time = Stackify::Utils.rounded_current_time
-      purge_older_than = current_time - 10.minutes
+      purge_older_than = current_time - TEN_MINUTES
       #read everything up to the start of the current minute
       read_queued_metrics_batch current_time
       handle_zero_reports current_time
@@ -67,7 +67,7 @@ module Stackify::Metrics
       if first_50_metrics.length > 0
         #only getting metrics less than 10 minutes old to drop old data in case we get backed up
         #they are removed from the @aggregated_metrics in the upload function upon success
-        upload_aggregates(first_50_metrics.select { |_key, aggr| aggr.occurred_utc > current_time - 10.minutes })
+        upload_aggregates(first_50_metrics.select { |_key, aggr| aggr.occurred_utc > current_time - TEN_MINUTES })
       end
       @aggregate_metrics.delete_if { |_key, aggr| aggr.occurred_utc < purge_older_than }
     end
