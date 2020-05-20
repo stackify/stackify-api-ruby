@@ -4,14 +4,26 @@ class Fixnum
   SECONDS_IN_DAY = 24 * SECONDS_IN_HOUR
 
   def days
-    self * SECONDS_IN_DAY
+    begin
+      super
+    rescue
+      self * SECONDS_IN_DAY
+    end
   end
 
   def minutes
-    self * SECONDS_IN_MINUTE
+    begin
+      super
+    rescue
+      self * SECONDS_IN_MINUTE
+    end
   end
 
   def ago
-    Time.now - self
+    begin
+      super
+    rescue
+      Time.now - self
+    end
   end
 end
