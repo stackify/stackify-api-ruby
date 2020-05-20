@@ -12,8 +12,10 @@ module Stackify
       end
     end
 
-    def log level, msg, call_trace
-      puts msg  # display logs in the console
+    def log num_level, level, msg, call_trace
+      if num_level <= Logger.const_get(level.upcase).to_i
+        puts msg
+      end
       return if @@transport.nil?
       task = log_message_task level, msg, call_trace
       @@transport.log level, msg, call_trace, task
