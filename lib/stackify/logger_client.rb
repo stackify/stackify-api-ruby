@@ -12,7 +12,16 @@ module Stackify
       end
     end
 
-    def log level, msg, call_trace
+    # This function is responsible in displaying log messages based on the level criteria
+    # @param num_level [Integer]  level of the clients Rails.logger
+    # @param level [String]       level coming from array of levels(debug info warn error fatal unknown) that we are going to filter with num_level
+    #                             So we filter all logs from num_level up to this level
+    # @param msg [Integer]        log messages
+    # @param call_trace [Object]  return the current execution stack
+    def log num_level, level, msg, call_trace
+      if num_level <= Logger.const_get(level.upcase).to_i
+        puts msg
+      end
       return if @@transport.nil?
       task = log_message_task level, msg, call_trace
       @@transport.log level, msg, call_trace, task

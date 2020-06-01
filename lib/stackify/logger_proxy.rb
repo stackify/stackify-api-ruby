@@ -1,14 +1,16 @@
+
 module Stackify
   class LoggerProxy < Object
 
     def initialize logger
-      @logger = logger
-      @logger.level = Logger.const_get(Stackify.configuration.log_level.to_s.upcase)
+      rails_logger  = logger
+      num_level     = logger.level
+      @logger       = rails_logger
       %w(debug info warn error fatal unknown).each do |level|
         stackify_logger = if level == 'debug'
-          -> (msg, caller) { Stackify.logger_client.log(level.downcase, msg, caller) unless msg.to_s.empty? }
+          -> (msg, caller) { Stackify.logger_client.log(num_level, level.downcase, msg, caller) unless msg.to_s.empty? }
         else
-          -> (msg, caller) { Stackify.logger_client.log(level.downcase, msg, caller) }
+          -> (msg, caller) { Stackify.logger_client.log(num_level, level.downcase, msg, caller) }
         end
         LoggerProxy.class_eval do
           define_method level.to_sym do |*args , &block|

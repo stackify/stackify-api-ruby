@@ -3,6 +3,14 @@ module Stackify
 
     def initialize name = 'LogsSender worker'
       super
+      case Stackify.configuration.transport
+      when Stackify::DEFAULT
+        name = 'LogsSender worker'
+      when Stackify::UNIX_SOCKET
+        name = 'UnixSocketSender worker'
+      when Stackify::AGENT_HTTP
+        name = 'AgentHTTPSender worker'
+      end
       @name = name
       @name += " ##{self.id}"
       @type = :logs_send
