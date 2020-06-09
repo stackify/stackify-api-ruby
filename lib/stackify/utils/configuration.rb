@@ -3,7 +3,7 @@ module Stackify
   class Configuration
 
     attr_accessor :api_key, :app_name, :app_location, :env, :log_level, :logger,
-                  :proxy, :mode, :base_api_url, :api_enabled, :transport, :errors, :http_endpoint
+                  :proxy, :mode, :base_api_url, :api_enabled, :transport, :errors, :http_endpoint, :stdout_output, :buffered_logger
 
     attr_reader :send_interval, :flood_limit, :queue_max_size, :agent_log_url, :unix_socket_path, :http_endpoint
 
@@ -25,6 +25,8 @@ module Stackify
       @agent_log_url = '/log'
       @unix_socket_path = '/usr/local/stackify/stackify.sock'
       @http_endpoint = get_env 'STACKIFY_TRANSPORT_HTTP_ENDPOINT', 'https://localhost:10601'
+      @stdout_output = false
+      @buffered_logger = false
     end
 
     def get_env env_key, default

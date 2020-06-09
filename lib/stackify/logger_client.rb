@@ -19,9 +19,26 @@ module Stackify
     # @param msg [Integer]        log messages
     # @param call_trace [Object]  return the current execution stack
     def log num_level, level, msg, call_trace
-      if num_level <= Logger.const_get(level.upcase).to_i
-        puts msg
+      display_log = true
+      log_appender = false
+      buffer_log = false
+      if defined? Rails
+        display_log = false if Stackify.configuration.stdout_output
+        log_appender = true if defined?(Logging)
+        buffer_log = true if Stackify.configuration.buffered_logger
+        unless buffer_log
+          if Gem::Version.new(Rails::VERSION::STRING) >= Gem::Version.new('4.0')
+            if display_log && log_appender
+              puts msg if num_level <= Logger.const_get(level.upcase).to_i
+            elsif display_log && log_appender == false
+              puts msg if num_level <= Logger.const_get(level.upcase).to_i
+            end
+          end
+        end
+      else
+        puts msg if num_level <= Logger.const_get(level.upcase).to_i
       end
+
       return if @@transport.nil?
       task = log_message_task level, msg, call_trace
       @@transport.log level, msg, call_trace, task
