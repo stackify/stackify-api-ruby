@@ -46,4 +46,29 @@ module Stackify::Utils
       'app_location' => Stackify.configuration.app_location || Dir.pwd
     }
   end
+
+  # Check if the app is running on rails and the logger output is using STDOUT
+  def self.check_log_output
+    if defined? Rails
+      if Gem::Version.new(Rails::VERSION::STRING) >= Gem::Version.new('5.0')
+        Stackify.configuration.stdout_output = ActiveSupport::Logger.logger_outputs_to?(Rails.logger, STDOUT)
+      else
+        Stackify.configuration.stdout_output = self.logger_stdout
+      end
+    end
+  end
+
+  def self.logger_stdout
+    logdev = ::Rails.logger.instance_variable_get(:@logdev)
+    logger_source = logdev.dev if logdev.respond_to?(:dev)
+    sources = [$stdout]
+    found = sources.any? { |source| source == logger_source }
+  end
+
+  # Check if the rails version 3 and it's using the buffered logger
+  def self.check_buffered_logger
+    is_buffered_logger = false
+    is_buffered_logger = true if ::Rails.logger.is_a?(ActiveSupport::BufferedLogger)
+    Stackify.configuration.buffered_logger = is_buffered_logger
+  end
 end
