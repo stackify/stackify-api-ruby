@@ -52,13 +52,13 @@ module Stackify
           end
         else
           # Handle the stdout logs from Action Controller
-          ActionController::Base.logger = logger
+          ActionController::Base.logger = new_logger
 
           # Handle the stdout logs from Action View
-          ActionView::Base.logger = logger
+          ActionView::Base.logger = new_logger
 
           # Handle the stdout logs from Active Record
-          ActiveRecord::Base.logger = logger
+          ActiveRecord::Base.logger = new_logger
         end
       end
     end
