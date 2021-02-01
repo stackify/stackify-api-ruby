@@ -39,15 +39,27 @@ module Stackify
         end
       end
 
-      def set_console_logs logger
-        # Handle the stdout logs from Action Controller
-        ActionController::Base.logger = logger
+      def set_console_logs new_logger
+        if Gem::Version.new(Rails::VERSION::STRING) >= Gem::Version.new('6.0')
+          ActiveSupport.on_load(:action_controller_base) do
+            logger = new_logger
+          end
+          ActiveSupport.on_load(:action_view) do
+            logger = new_logger
+          end
+          ActiveSupport.on_load(:active_record) do
+            logger = new_logger
+          end
+        else
+          # Handle the stdout logs from Action Controller
+          ActionController::Base.logger = new_logger
 
-        # Handle the stdout logs from Action View
-        ActionView::Base.logger = logger
+          # Handle the stdout logs from Action View
+          ActionView::Base.logger = new_logger
 
-        # Handle the stdout logs from Active Record
-        ActiveRecord::Base.logger = logger
+          # Handle the stdout logs from Active Record
+          ActiveRecord::Base.logger = new_logger
+        end
       end
     end
 
