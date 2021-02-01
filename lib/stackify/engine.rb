@@ -1,7 +1,6 @@
 require 'stackify/rack/errors_catcher'
 module Stackify
   class Engine < ::Rails::Engine
-
     if Rails.version > '3.1'
       initializer 'Stackify set up of logger', group: :all do
         if Gem::Version.new(Rails::VERSION::STRING) >= Gem::Version.new('4.0')
@@ -17,16 +16,43 @@ module Stackify
         # Proxy the client Rails logger and write logs to its default log_path.
         # At the same time, we send the log messages to the LoggerClient.
         ::Rails.logger = ::Stackify::LoggerProxy.new ::Rails.logger
+        
+        local_logger = nil
+        set_logger = false
 
         if Gem::Version.new(Rails::VERSION::STRING) >= Gem::Version.new('6.0')
-          set_console_logs ::Rails.logger
+          set_logger = true
         elsif Gem::Version.new(Rails::VERSION::STRING) >= Gem::Version.new('4.0')
           if is_activesupport_logger && Stackify.configuration.stdout_output
-            set_console_logs ::Rails.logger
+            set_logger = true
           end
           # Another checking if the client app is using the default logger and not STDOUT
           if Stackify.configuration.stdout_output == false
-            set_console_logs ::Rails.logger
+            set_logger = true
+          end
+        end
+
+        if set_logger
+          set_console_logs ::Rails.logger
+          local_logger = ::Rails.logger
+        end
+
+        # Inside initializer
+        if Gem::Version.new(Rails::VERSION::STRING) >= Gem::Version.new('6.0')
+          ActiveSupport.on_load(:action_controller_base) do
+            if logger.equal?(local_logger) == false
+              logger = local_logger
+            end
+          end
+          ActiveSupport.on_load(:action_view) do
+            if logger.equal?(local_logger) == false
+              logger = local_logger
+            end
+          end
+          ActiveSupport.on_load(:active_record) do
+            if logger.equal?(local_logger) == false
+              logger = local_logger
+            end
           end
         end
 
@@ -40,17 +66,7 @@ module Stackify
       end
 
       def set_console_logs new_logger
-        if Gem::Version.new(Rails::VERSION::STRING) >= Gem::Version.new('6.0')
-          ActiveSupport.on_load(:action_controller_base) do
-            logger = new_logger
-          end
-          ActiveSupport.on_load(:action_view) do
-            logger = new_logger
-          end
-          ActiveSupport.on_load(:active_record) do
-            logger = new_logger
-          end
-        else
+        if Gem::Version.new(Rails::VERSION::STRING) < Gem::Version.new('6.0')
           # Handle the stdout logs from Action Controller
           ActionController::Base.logger = new_logger
 
