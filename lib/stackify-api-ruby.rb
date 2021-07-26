@@ -37,6 +37,7 @@ module Stackify
   autoload :StringException,      'stackify/error'
   autoload :ErrorsGovernor,       'stackify/errors_governor'
   autoload :Metrics,              'stackify/metrics/metrics'
+  autoload :Rum,                  'stackify/rum'
 
   include Authorizable
 
@@ -46,6 +47,10 @@ module Stackify
 
     def configuration
       @config ||= Stackify::Configuration.new
+    end
+
+    def rum
+      @rum ||= Stackify::Rum.new(configuration)
     end
 
     def setup
