@@ -124,6 +124,23 @@ We can configure every metric with settings:
 
 Note, "autoreport_last_value_if_nothing_reported" property has influence only on "average" metric.
 
+### **Real User Monitoring (RUM)**
+
+Real user monitoring injects a script tag containing the [RUM JS](https://stackify.com/retrace-real-user-monitoring/) that is responsible for capturing information about the http requests on the browser. This approach is manual and needs to be configured.
+
+#### RUM - Setup
+
+```ruby
+# Configuration - Standard API
+Stackify.setup do |config|
+  ...
+  config.rum_key = "YourRumKey"
+end
+
+# Use this to apply on views
+Stackify.rum.insert_rum_script
+```
+
 ## Troubleshooting
 
 If there are problems, you can enable internal logging of the stackify-api-ruby project. Uncomment out the config.logger and config.logger.level lines in the 'config/initializers/stackify.rb' file:
