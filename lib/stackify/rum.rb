@@ -13,7 +13,7 @@ module Stackify
     end
 
     def insert_rum_script()
-      return StackifyRubyAPM.inject_rum_script if Rum.apm_loaded && defined?(StackifyRubyAPM)
+      return StackifyRubyAPM.inject_rum_script if Rum.apm_loaded && defined?(StackifyRubyAPM) && StackifyRubyAPM.respond_to?(:inject_rum_script)
 
       return '' unless @config
 
