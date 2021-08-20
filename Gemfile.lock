@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    stackify-api-ruby (1.2.10)
+    stackify-api-ruby (1.3.0.beta1)
       faraday (~> 0.8)
       net_http_unix (~> 0.2)
 
