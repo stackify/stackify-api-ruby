@@ -1,3 +1,12 @@
+ENV['RAILS_ENV'] = ENV['RACK_ENV'] = 'test'
+require 'bundler/setup'
+
+# auto-require default gems + gems under test
+Bundler.require :default, 'test'
+
+require 'logger'
+require 'stackify_ruby_apm'
+
 RSpec.configure do |config|
 
   config.filter_run :focus

@@ -1,24 +1,62 @@
 PATH
   remote: .
   specs:
-    stackify-api-ruby (1.1.0)
+    stackify-api-ruby (1.2.10)
       faraday (~> 0.8)
+      net_http_unix (~> 0.2)
 
 GEM
   remote: https://rubygems.org/
   specs:
-    faraday (0.15.4)
+    concurrent-ruby (1.1.9)
+    diff-lcs (1.4.4)
+    et-orbi (1.2.4)
+      tzinfo
+    faraday (0.17.4)
       multipart-post (>= 1.2, < 3)
-    multipart-post (2.0.0)
+    fugit (1.5.0)
+      et-orbi (~> 1.1, >= 1.1.8)
+      raabro (~> 1.4)
+    multipart-post (2.1.1)
+    net_http_unix (0.2.2)
+    raabro (1.4.0)
     rake (0.9.6)
+    rspec (3.10.0)
+      rspec-core (~> 3.10.0)
+      rspec-expectations (~> 3.10.0)
+      rspec-mocks (~> 3.10.0)
+    rspec-core (3.10.1)
+      rspec-support (~> 3.10.0)
+    rspec-expectations (3.10.1)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.10.0)
+    rspec-mocks (3.10.2)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.10.0)
+    rspec-support (3.10.2)
+    rufus-scheduler (3.8.0)
+      fugit (~> 1.1, >= 1.1.6)
+    stackify-ruby-apm (1.15.1)
+      concurrent-ruby (~> 1.0)
+      faraday (~> 0.8)
+      net_http_unix (~> 0.2)
+      rufus-scheduler (~> 3.0)
+    tzinfo (2.0.4)
+      concurrent-ruby (~> 1.0)
+    tzinfo-data (1.2021.1)
+      tzinfo (>= 1.0.0)
 
 PLATFORMS
   ruby
+  x86-mingw32
 
 DEPENDENCIES
   bundler (~> 1.6)
   rake (~> 0)
+  rspec (~> 3.0)
   stackify-api-ruby!
+  stackify-ruby-apm (~> 1.15)
+  tzinfo-data
 
 BUNDLED WITH
-   1.17.3
+   1.17.13

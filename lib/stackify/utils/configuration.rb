@@ -5,7 +5,8 @@ module Stackify
     attr_accessor :api_key, :app_name, :app_location, :env, :log_level, :logger,
                   :proxy, :mode, :base_api_url, :api_enabled, :transport, :errors, :http_endpoint, :stdout_output, :buffered_logger
 
-    attr_reader :send_interval, :flood_limit, :queue_max_size, :agent_log_url, :unix_socket_path, :http_endpoint
+    attr_reader :send_interval, :flood_limit, :queue_max_size, :agent_log_url, :unix_socket_path, :http_endpoint,
+                :rum_key, :rum_script_url
 
     def initialize
       @base_api_url = 'https://api.stackify.com'
@@ -27,6 +28,11 @@ module Stackify
       @http_endpoint = get_env 'STACKIFY_TRANSPORT_HTTP_ENDPOINT', 'https://localhost:10601'
       @stdout_output = false
       @buffered_logger = false
+      @default_rum_script_url = 'https://stckjs.stackify.com/stckjs.js'
+      @default_rum_key = ''
+
+      self.rum_key = get_env 'RETRACE_RUM_KEY', @default_rum_key
+      self.rum_script_url = get_env 'RETRACE_RUM_SCRIPT_URL', @default_rum_script_url
     end
 
     def get_env env_key, default
@@ -50,6 +56,28 @@ module Stackify
     def validate_transport_type
       return true if ['agent_socket', 'agent_http', 'default'].include? @transport
       @errors << 'Transport should be one of these values: [agent_socket, agent_http, default]. Should be a String.'
+    end
+
+    def rum_script_url=(rum_script_url)
+      if rum_script_url.empty?
+        @rum_script_url = @default_rum_script_url
+        return
+      end
+
+      if validate_rum_script_url(rum_script_url)
+        @rum_script_url = rum_script_url
+      end
+    end
+
+    def rum_key=(rum_key)
+      if rum_key.empty?
+        @rum_key = @default_rum_key
+        return
+      end
+
+      if validate_rum_key(rum_key)
+        @rum_key = rum_key
+      end
     end
 
     private
@@ -109,6 +137,28 @@ module Stackify
     def validate_mode
       return true if MODES.has_value? @mode
       @errors << 'Mode should be one of these values: [:both, :logging, :metrics]'
+    end
+
+    def validate_rum_script_url(rum_script_url)
+      result = false
+      if rum_script_url.is_a?(String) && !rum_script_url.empty?
+        result = rum_script_url =~ /^((((https?|ftps?|gopher|telnet|nntp):\/\/)|(mailto:|news:))(%[0-9A-Fa-f]{2}|[\-\(\)_\.!~*';\/?:@&=+$,A-Za-z0-9])+)([\)\.!';\/?:,][\[:blank:|:blank:\]])?$/
+      end
+      if !result
+        @errors << 'RUM Script URL is in invalid format.'
+      end
+      result
+    end
+
+    def validate_rum_key(rum_key)
+      result = false
+      if rum_key.is_a?(String) && !rum_key.empty?
+        result = rum_key =~ %r{^[A-Za-z0-9_-]+$}
+      end
+      if !result
+        @errors << 'RUM Key is in invalid format.'
+      end
+      result
     end
   end
 end
