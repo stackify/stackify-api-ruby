@@ -12,18 +12,18 @@ Gem::Specification.new do |spec|
   spec.description   = 'Stackify Logs and Metrics API for Ruby'
   spec.homepage      = 'http://www.stackify.com/'
   spec.license       = 'Apache-2.0'
-  spec.required_ruby_version = '>= 1.9'
+  spec.required_ruby_version = '>= 3.0'
 
   spec.files         = `git ls-files -z`.split("\x0")
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ['lib']
 
-  spec.add_development_dependency 'bundler', '~> 1.6'
-  spec.add_development_dependency 'rake', '~> 0'
+  spec.add_development_dependency 'bundler', '~> 2.0'
+  spec.add_development_dependency 'rake', '~> 10.0'
   spec.add_development_dependency 'rspec', '~> 3.0'
 
-  if RUBY_PLATFORM == 'i386-mingw32'
+  if RUBY_PLATFORM =~ /mingw32|win32|x64/
     spec.add_development_dependency 'tzinfo-data'
   end
 
