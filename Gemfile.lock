@@ -26,7 +26,7 @@ GEM
     proc_extensions (0.2)
       sourcify (~> 0.5)
     raabro (1.4.0)
-    rake (10.5.0)
+    rake (13.0.6)
     rspec (3.10.0)
       rspec-core (~> 3.10.0)
       rspec-expectations (~> 3.10.0)
@@ -64,8 +64,6 @@ GEM
       sync
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
-    tzinfo-data (1.2023.3)
-      tzinfo (>= 1.0.0)
 
 PLATFORMS
   ruby
@@ -74,11 +72,10 @@ PLATFORMS
 
 DEPENDENCIES
   bundler (~> 2.0)
-  rake (~> 10.0)
+  rake (~> 13.0)
   rspec (~> 3.0)
   stackify-api-ruby!
   stackify-ruby-apm (~> 1.16.0.beta1)
-  tzinfo-data
 
 BUNDLED WITH
    2.4.10
