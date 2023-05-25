@@ -24,8 +24,8 @@ module Stackify
 
     protected
 
-    def method_missing(name, *args, &block)
-      @logger.send(name, *args, &block)
+    def method_missing(name, *args, **kwargs, &block)
+      @logger.send(name, *args, **kwargs, &block)
     end
 
     private
