@@ -1,8 +1,8 @@
 group :test do
     if ENV['STACKIFY_RUBY_TEST']
-        gem 'stackify-ruby-apm', '~> 1.16.0.beta1', source: ENV['STACKIFY_RUBY_TEST_REPO']
+        gem 'stackify-ruby-apm', '~> 1.16.0', source: ENV['STACKIFY_RUBY_TEST_REPO']
     else
-        gem 'stackify-ruby-apm', '~> 1.16.0.beta1'
+        gem 'stackify-ruby-apm', '~> 1.16.0'
     end
 end
 
