@@ -21,3 +21,10 @@
 # Ignore IntelliJ files
 /.idea
 *.iml
+
+# Ignore lock file
+Gemfile.lock
+
+# Version specific files
+.ruby-version
+.ruby-gemset
