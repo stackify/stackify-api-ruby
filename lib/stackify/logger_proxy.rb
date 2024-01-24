@@ -6,6 +6,7 @@ module Stackify
       rails_logger  = logger
       num_level     = logger.level
       @logger       = rails_logger
+
       %w(debug info warn error fatal unknown).each do |level|
         stackify_logger = if level == 'debug'
           -> (msg, caller) { Stackify.logger_client.log(num_level, level.downcase, msg, caller) unless msg.to_s.empty? }
@@ -26,6 +27,10 @@ module Stackify
 
     def method_missing(name, *args, **kwargs, &block)
       @logger.send(name, *args, **kwargs, &block)
+    end
+
+    def respond_to_missing?(*args, **kwargs, &block)
+      @logger.respond_to?(*args, **kwargs, &block)
     end
 
     private

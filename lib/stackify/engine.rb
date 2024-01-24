@@ -3,7 +3,7 @@ module Stackify
   class Engine < ::Rails::Engine
 
     if Rails.version > '3.1'
-      initializer 'Stackify set up of logger', group: :all do
+      initializer 'Stackify set up of logger', after: :initialize_logger , group: :all do
         if Gem::Version.new(Rails::VERSION::STRING) >= Gem::Version.new('4.0')
           # check if the client app is using the ActiveSupport::Logger
           is_activesupport_logger = ::Rails.logger.is_a?(ActiveSupport::Logger)
